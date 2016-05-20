@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html> 
+<head>
+	<meta charset='UTF-8'>
+    <script src='js/include/jquery.min.js'></script>
+    <script src='js/include/jquery.smooth-scroll.js'></script>
+    <script src='js/include/buzz.js'></script>
+    <script src='https://code.createjs.com/easeljs-0.8.2.min.js'></script>
+
+    <script>
+        /*
+            <link href='https://fonts.googleapis.com/css?family=Merriweather:300,300italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Julius+Sans+One&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Playfair+Display:400,400italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Playfair+Display+SC:400,400italic,700italic,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Old+Standard+TT:400,400italic,700' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Poiret+One&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Petit+Formal+Script&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Italiana' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Alegreya+SC:400,400italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Marcellus&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Quattrocento:400,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Crimson+Text:400,400italic,600,600italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Old+Standard+TT:400,400italic,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Cinzel+Decorative:400,700,900' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Cinzel:400,700,900' rel='stylesheet' type='text/css'>
+                <img src='img/TBIM_DECO_Header_1024x64.png' id='footerdeco' />
+    <link href='https://fonts.googleapis.com/css?family=Cardo:400,400italic,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+            <div class="sigicontainer">
+                <canvas id="demoCanvas" width="320" height="320"></canvas>
+            </div>
+                <div class="footer">
+        <div id="righticonbar"></div>
+        <div class="footericon"></div>
+    </div>
+        */
+    </script>
+
+    <link rel='stylesheet' type='text/css' href='css/style.reset.css' />
+    <link rel='stylesheet' type='text/css' href='css/font.library.css' />
+    <link rel='stylesheet' type='text/css' href='css/font/crimson/stylesheet.css' />
+    <link rel='stylesheet' type='text/css' href='css/font.library.silver.css' />
+    <link rel='stylesheet'           type='text/css'                 href='css/style.silver.css' />
+    <link rel='stylesheet' type='text/css' href='css/style.timeline.css' />
+    <script                                                          src='js/inquisitorParse.js'></script>
+    <script src='js/inquisitorMain.js'></script>
+    <script src='js/sigil.js'></script>
+	<script 														 src='js/jquery.main.js'></script>
+    <script src='js/timeline.js'></script>
+	<title></title>
+</head>
+<body onload="forceRefresh();">
+    <div id="background" class="background"></div>
+    <div id="backgroundoffsetcontainer" class="backgroundoffsetcontainer"><div id="backgroundoffset" class="backgroundoffset"><div id="backgroundoffsetdouble" class="backgroundoffsetdouble"></div></div></div>
+    <div id="backgroundvignette" class="backgroundvignette"></div>
+    <div id="backgroundbordercontainer"></div>
+    <span id="exitprompt" class="prompt"></span>
+    <span id="clearprompt" class="prompt"></span>
+    <div class="content">
+        <section class="cd-horizontal-timeline" id="timeline">
+            <div class="timelinemaster">
+                <div class="timelinerotator">
+                    <div class="timeline">
+                        <div class="events-wrapper">
+                            <div class="events">
+                                <div id='timelinediamond'>
+                                    <span class="diamondradial"></span><span class="diamondradial circle"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-20deg );"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-40deg );"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-60deg );"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-80deg );"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-100deg);"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-120deg);"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-140deg);"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-160deg);"></span>
+                                    <span class="diamondradial diamondline" style="transform: rotate(-180deg);"></span>
+                                </div>
+                                <div class="events-references" id="events-references">
+                                </div>
+                                    <span class="filling-line" aria-hidden="true"></span>
+                                </div> <!-- .events -->
+                        </div> <!-- .events-wrapper -->
+
+                        <ul class="cd-timeline-navigation">
+                            <li><a href="#0" class="prev inactive">Prev</a></li>
+                            <li><a href="#0" class="next">Next</a></li>
+                        </ul> <!-- .cd-timeline-navigation -->
+                    </div> <!-- .timeline -->
+                </div>
+            </div>
+            <div class="events-content" id="events-content">
+            </div> <!-- .events-content -->
+</section>
+        <div id="core">
+            <div id="div4">
+                <h4 id='superlocation'></h4>
+                <div class='headerbox'><h1 id='location'></h1></div>
+                <hr class="style-eight">
+                <p id='dialoguefader1' class='dialoguefader'></p>
+                <p id='dialogue' class='dialogue'></p>
+                <p id='dialoguefader2' class='dialoguefader'></p>
+                <hr id='dialoguedivider2' class="style-eight">
+                <div id='eventmaster'><p id='event'></p></div>
+                <p id='note'><div id='noteline'></div></p>
+                <p id='notenew' class="excludefirst" />
+                <p id='notecontinue' class="continueprompt"></p>
+                <p id='objects' class='destinations'></p>
+                <p id='vessels' class='destinations'></p>
+                <hr id='endofnote' class="style-two">
+                <div id='diamondcontainer'>
+                    <div id="diamond" class='diamond'>
+                        <span class="diamondradial"></span>
+                        <span class="diamondradial circle"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-10deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-20deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-30deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-40deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-50deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-60deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-70deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-80deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-90deg );"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-100deg);"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-110deg);"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-120deg);"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-130deg);"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-140deg);"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-150deg);"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-160deg);"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-170deg);"></span>
+                        <span class="diamondradial diamondline" style="transform: rotate(-180deg);"></span>
+                    </div>
+                    <div id='diamondtextcontainer'>
+                        <div class='diamonddirection' id='diamondnorth'><p id='NorthIndictator' class='direction directionalt'>N</p><p id='North' class='destinations directional directionalt'></p></div>
+                        <div class='diamonddirection' id='diamondsouth'><p id='SouthIndictator' class='direction'>S</p><p id='South' class='destinations directional'></p></div>
+                        <div class='diamonddirection' id='diamondeast' ><p id='EastIndictator' class='direction'>E</p><p id='East' class='destinations directional'></p></div>
+                        <div class='diamonddirection' id='diamondwest' ><p id='WestIndictator' class='direction directionalt'>W</p><p id='West' class='destinations directional directionalt'></p></div>
+                    </div>
+                    <div id='lyscontainer'>
+                        <div class='diamond' id="lysdiamondouter"><div class='diamond' id="lysdiamond"><p id="lyscounter">II</p></div></div>
+                    </div>
+                </div>
+            <canvas id="forceRefresh" width="1" height="1"></canvas>
+    </div>
+</body>
+</html>
