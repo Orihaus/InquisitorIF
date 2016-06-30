@@ -1,4 +1,4 @@
-var worldLocation = 'thesilvermasque_world_v0.25.inq';
+var worldLocation = 'yourproject.inq';
 var world;
 
 var lastlastWorldLocationID = 0;
@@ -8,6 +8,10 @@ var persistentworld = {};
 var loadsaveerror = false;
 var loadsavestatus = 0;
 var expanddescription = true;
+var backgroundimageurltimeline = '';
+var backgroundimageurl;
+var currentbackgroundbuffer = "backgroundprimary";
+var lastbackground = '';
 
 var isusingnwjs = true;
 try 
@@ -54,8 +58,8 @@ function newsave()
     persistentworld.time = {};
     persistentworld.entity = {};
     persistentworld.lys = {};
-    persistentworld.lys.vialcount = 1;
-    persistentworld.lys.currentlys = 10;
+    persistentworld.lys.vialcount = 0;
+    persistentworld.lys.currentlys = 50;
     persistentworld.store.currentWorldLocationID = 0;
     persistentworld.store.lastWorldLocationID = 0;
     persistentworld.store.sanity = "sane";
@@ -111,6 +115,44 @@ function displayconceptlinks( concept, descriptionsegments, conceptid )
     return descriptionsegments;
 }
 
+function bulkclassaddition( classtoadd )
+{
+    $( "#div4" ).addClass( classtoadd );
+    $( "#core" ).addClass( classtoadd );
+    $( ".headerbox" ).addClass( classtoadd );
+
+    $( "#superlocation" ).addClass( classtoadd );
+    $( "#location" ).addClass( classtoadd );
+    $( "#dialogue" ).addClass( classtoadd );
+    $( "#note" ).addClass( classtoadd );
+    $( "#event" ).addClass( classtoadd );
+    $( "#seperator" ).addClass( classtoadd );
+    $( "#vessels" ).addClass( classtoadd );
+    $( "#objects" ).addClass( classtoadd );
+    $( "#region" ).addClass( classtoadd );
+    $( "#subregion" ).addClass( classtoadd );
+    $( "#notenew" ).addClass( classtoadd );
+}
+
+function bulkclassremove( classtoremove )
+{
+    $( "#div4" ).removeClass( classtoremove );
+    $( "#core" ).removeClass( classtoremove );
+    $( ".headerbox" ).removeClass( classtoremove );
+
+    $( "#superlocation" ).removeClass( classtoremove );
+    $( "#location" ).removeClass( classtoremove );
+    $( "#note" ).removeClass( classtoremove );
+    $( "#dialogue" ).removeClass( classtoremove );
+    $( "#event" ).removeClass( classtoremove );
+    $( "#seperator" ).removeClass( classtoremove );
+    $( "#vessels" ).removeClass( classtoremove );
+    $( "#objects" ).removeClass( classtoremove );
+    $( "#region" ).removeClass( classtoremove );
+    $( "#subregion" ).removeClass( classtoremove );
+    $( "#notenew" ).removeClass( classtoremove );
+}
+
 var currentlocationprogress = 0, currentconceptprogress = 0;
 function updatedescription( additionalsegment )
 {
@@ -156,7 +198,21 @@ function updatedescription( additionalsegment )
         return descsegments;
     }
 
-    $( "#note" ).html( processBodyText( descsegments ) );
+    if ( persistentworld.world.state === 'linear' || indialogue )
+    {
+        //processeddialogue = '<linearlayout>' + processeddialogue + '</linearlayout>';
+        bulkclassaddition( 'linearlayout' );
+    }
+    else
+    {
+        bulkclassremove( 'linearlayout' );
+    }
+
+    if ( !indialogue )
+    {
+        var processeddialogue = processBodyText( descsegments );
+        $( "#note" ).html( processeddialogue );
+    }
 
     crossfadeelement( $( "#note" ).find( "#" + currentlocationprogress ), 250 + calculatereadingtime( descsegments[descsegments.length - 1].text ) / 20, 0 );
 
@@ -177,9 +233,10 @@ function calculatereadingtime( texttoread )
 }
 
 var timelineeventsadded = 0;
+var truetimelineeventsadded = 0;
 
 var showingvessels = false;
-function updatetime()
+function updatetime( forcetraverse )
 {
     currentlocationprogress = persistentworld.world.locationvisited[persistentworld.store.currentWorldLocationID]
             ? inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length - 1
@@ -200,68 +257,17 @@ function updatetime()
     console.log( "Inquisitor: Global time now at : " + persistentworld.time.globaltime + ". Local time now at : " + persistentworld.time.locationtime[persistentworld.store.currentWorldLocationID] );
 
     inquisitor.updateentities();
-    inquisitor.updatetimeline();
+
+    if ( !timelinebegun )
+    {
+        inquisitor.updatetimeline();
+    }
 
     //
 
     var traverseoncompletion = false;
 
     console.log( 'inquisitor: state is ' + persistentworld.world.state );
-    if ( persistentworld.world.state !== 'stateless' && persistentworld.world.state !== 'linear' )
-    {
-        persistentworld.lys.currentlys -= 5;
-        if ( persistentworld.lys.currentlys < 0 )
-        {
-            persistentworld.lys.vialcount--;
-
-            if ( persistentworld.lys.vialcount < 0 )
-            {
-                persistentworld.lys.vialcount = 0;
-                traverseoncompletion = true;
-            }
-            
-                persistentworld.lys.currentlys = 100;
-        }
-
-        console.log( "Lys state. vialcount: " + persistentworld.lys.vialcount + " lyscount: " + persistentworld.lys.currentlys );
-
-        //$( "#lyscontainer" ).show();
-        $( "#lysdiamondouter" ).css( 'border-image', "-webkit-linear-gradient(45deg,rgba(166,148,113,0.3) 0%,rgba(166,148,113,0.9) " + persistentworld.lys.currentlys + "%,rgba(0,0,0,0.8)" + ( persistentworld.lys.currentlys + 2 ) + "%) 1" );
-
-        var vialcountstring = "-";
-        switch ( persistentworld.lys.vialcount )
-        {
-            case 1:
-                vialcountstring = 'I';
-                break;
-            case 2:
-                vialcountstring = 'II';
-                break;
-            case 3:
-                vialcountstring = 'III';
-                break;
-            case 4:
-                vialcountstring = 'IV';
-                break;
-            case 5:
-                vialcountstring = 'V';
-                break;
-        }
-
-        $( "#lyscounter" ).html( vialcountstring );
-
-        $( "#lyscontainer" ).removeClass( "alwaysHide" );
-        $( "#lysdiamondouter" ).removeClass( "alwaysHide" );
-        $( "#lysdiamond" ).removeClass( "alwaysHide" );
-        $( "#lyscounter" ).removeClass( "alwaysHide" );
-    }
-    else
-    {
-        $( "#lyscontainer" ).addClass( "alwaysHide" );
-        $( "#lysdiamondouter" ).addClass( "alwaysHide" );
-        $( "#lysdiamond" ).addClass( "alwaysHide" );
-        $( "#lyscounter" ).addClass( "alwaysHide" );
-    }
 
     //
 
@@ -292,7 +298,7 @@ function updatetime()
 
     if ( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length !== 0 )
     {
-        if ( currentlocationprogress < inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length - 1 )
+        if ( currentlocationprogress < inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length )
         {
             crossfadeelement( $( "#notecontinue" ), 1500, 0, "\n..." );
             $( "#endofnote" ).hide();
@@ -345,6 +351,80 @@ function updatetime()
 
     toggletimeline();
 
+    if ( persistentworld.world.state === 'linear' )
+    {
+        var sectionholderhtml = '';
+        var dialoguecount = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length;
+        var alreadyactivated = false;
+        for ( var dialogueindex = dialoguecount - 1; dialogueindex > 0; dialogueindex-- )
+        {
+            if ( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments[dialogueindex].isbreak || dialogueindex === 1 )
+            {
+                var allowactivation = currentlocationprogress > dialogueindex && !alreadyactivated;
+                if ( allowactivation )
+                {
+                    alreadyactivated = true;
+                }
+
+                sectionholderhtml = "<h3 id='sectionone' class='" + ( allowactivation ? 'activesection' : 'section' ) + "'></h3>" + sectionholderhtml;
+            }
+        }
+
+        $( "#sectionholder" ).html( sectionholderhtml );
+    }
+
+    if ( persistentworld.world.state !== 'stateless' && persistentworld.world.state !== 'linear' && !indialogue )
+    {
+        if ( doshow && conceptsover && !persistentworld.world.locationvisited[persistentworld.store.currentWorldLocationID] )
+        {
+            persistentworld.lys.currentlys += 20;
+            if ( persistentworld.lys.currentlys > 100 )
+            {
+                persistentworld.lys.vialcount++;
+                persistentworld.lys.currentlys = 0;
+            }
+        }
+
+        console.log( "Lys state. vialcount: " + persistentworld.lys.vialcount + " lyscount: " + persistentworld.lys.currentlys );
+
+        //$( "#lyscontainer" ).show();
+        $( "#lysdiamondouter" ).css( 'border-image', "-webkit-linear-gradient(45deg,rgba(166,148,113,0.3) 0%,rgba(166,148,113,0.9) " + persistentworld.lys.currentlys + "%,rgba(0,0,0,0.8)" + ( persistentworld.lys.currentlys + 2 ) + "%) 1" );
+
+        var vialcountstring = "-";
+        switch ( persistentworld.lys.vialcount )
+        {
+            case 1:
+                vialcountstring = 'I';
+                break;
+            case 2:
+                vialcountstring = 'II';
+                break;
+            case 3:
+                vialcountstring = 'III';
+                break;
+            case 4:
+                vialcountstring = 'IV';
+                break;
+            case 5:
+                vialcountstring = 'V';
+                break;
+        }
+
+        $( "#lyscounter" ).html( vialcountstring );
+
+        $( "#lyscontainer" ).removeClass( "alwaysHide" );
+        $( "#lysdiamondouter" ).removeClass( "alwaysHide" );
+        $( "#lysdiamond" ).removeClass( "alwaysHide" );
+        $( "#lyscounter" ).removeClass( "alwaysHide" );
+    }
+    else
+    {
+        $( "#lyscontainer" ).addClass( "alwaysHide" );
+        $( "#lysdiamondouter" ).addClass( "alwaysHide" );
+        $( "#lysdiamond" ).addClass( "alwaysHide" );
+        $( "#lyscounter" ).addClass( "alwaysHide" );
+    }
+
     if ( doshow && conceptsover )
     {
         toggleExpand();
@@ -374,7 +454,7 @@ function updatetime()
         toggleExpand();
     }
 
-    if( traverseoncompletion )
+    if( traverseoncompletion || forcetraverse )
     {
         persistentworld.store.lastWorldLocationID = persistentworld.store.currentWorldLocationID;
         persistentworld.store.currentWorldLocationID = inquisitor.traverselinearlocation();
@@ -382,11 +462,21 @@ function updatetime()
         redraw();
     }
 
-    var backgroundimageurl = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundimage;
-    if ( backgroundimageurl !== '' )
+    backgroundimageurl = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundimage;
+}
+
+function redrawbackground()
+{
+    if ( !( backgroundimageurl === '' || lastbackground === backgroundimageurl ) )
     {
-        $( '#background' ).css( "background-image", "url(img/" + backgroundimageurl + ")" );
-        //console.log( backgroundimageurl );
+        $( '#' + currentbackgroundbuffer ).fadeOut( 1200 );
+        currentbackgroundbuffer = ( currentbackgroundbuffer === 'backgroundprimary' ? 'backgroundsecondary' : 'backgroundprimary' );
+
+        $( '#' + currentbackgroundbuffer ).css( "background-image", "url(img/" + backgroundimageurl + ")" );
+        $( '#' + currentbackgroundbuffer ).fadeIn( 1200 );
+        lastbackground = backgroundimageurl;
+
+        console.log( currentbackgroundbuffer );
     }
 }
 
@@ -590,18 +680,30 @@ function toggletimeline()
 
     if ( viewingtimeline )
     {
+        $( '#events-content' ).hide();
         $.smoothScroll( {
             scrollElement: $( '.content' ),
-            offset: findcenter( '#core' ) + 50
+            offset: findcenter( '#div4' ) + ( !( persistentworld.world.state === 'linear' || indialogue ) ? 100 : 0 )
         } );
+
+        backgroundimageurl = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundimage;
     }
     else
     {
+        $( '#events-content' ).fadeIn( 700 );
         $.smoothScroll( {
             scrollElement: $( '.content' ),
             offset: findcenter( '#timeline' )
         } );
+        $.smoothScroll( {
+            scrollElement: $( '.content' ),
+            offset: findcenter( '.selected' ),
+        } );
+
+        backgroundimageurl = backgroundimageurltimeline;
     }
+
+    redrawbackground();
 
     //$( "#exitprompt" ).html( "viewingtimeline: " + viewingtimeline );
 }
@@ -844,6 +946,15 @@ function init()
         tryupdatetime();
     } );
 
+    $( "#lysdiamond" ).live( "click", function ()
+    {
+        if ( persistentworld.lys.vialcount > 0 )
+        {
+            persistentworld.lys.vialcount--;
+            updatetime( persistentworld.world.state !== 'linear' );
+        }
+    } );
+
     /*$( "#note" ).scroll( function ()
     {
         tryupdatetime();
@@ -994,8 +1105,14 @@ function processdescriptiontext( descriptiontext, removefirst )
         description += "</afterfirst>";
     }
 
+    //description = replacecharacter( description, '—', ' V ', ' V ' );
     description = replacecharacter( description, '*', '<emphasis>', '</emphasis>' );
     description = replacecharacter( description, '%', '<inner>', '</inner>' );
+
+    if ( description.trim() === '-' )
+    {
+        return '<hr class="textbreak">';
+    }
 
     return description;
 }
@@ -1010,7 +1127,7 @@ function processdrawntextsegment( type, iscurrent, differenceovertruemax, truein
             segmentclass = overridesegmentclass;
         }
 
-        var brightness = " style='color: rgba(209,209,209," + ( iscurrent ? 1.0 : 1.0 - differenceovertruemax ) + ");'";// font-size:" + ( iscurrent && !alliscurrent ? 107 : 90 ) + "%;' ";
+        var brightness = " style='color: rgba(209,209,209, 1.0);'";// font-size:" + ( iscurrent && !alliscurrent ? 107 : 90 ) + "%;' ";( iscurrent ? 1.0 : 1.0 - differenceovertruemax ) 
 
         var finaltextsegment = "<" + type + " class='" + segmentclass + "'" + brightness + "index='" + trueindex + "' id='" + trueindex + "'>"
             + processdescriptiontext( text, !isfirstindex || removefirst ) + "</" + type + ">";
@@ -1196,13 +1313,13 @@ function processBodyText( inputdescriptionsegments, isevent, removefirst, length
                         var segmentclass = ( !( persistentworld.time.locationtime[linklocationid] === null || persistentworld.time.locationtime[linklocationid] === undefined ) ? 'visited' : 'unvisited' );
                         var finaltextsegment = "inlinelink id='" + trueindex + "' data='" + ( isconceptuallink ? linklocationid : linklocationid ) + "' conceptual='" + isconceptuallink + "' ";
 
-                        rawtext += processdrawntextsegment( finaltextsegment, iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, currentdescriptionsegment[index].text, index, currentprogress );
+                        rawtext += processdrawntextsegment( finaltextsegment, iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, ( isconceptuallink ? "" : "" ) + currentdescriptionsegment[index].text, index, currentprogress );
                     }
                 }
 
                 if ( linkfailed )
                 {
-                    //console.log( currentdescriptionsegment[index].text );
+                    console.log( currentdescriptionsegment[index].text );
                     rawtext += processdrawntextsegment( "inactivenote", iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, currentdescriptionsegment[index].text, index, currentprogress, segmentclass, currentdescriptionsegment[index].force );
                 }
             }
@@ -1583,7 +1700,7 @@ function displayvessels()
 
         if ( persistentworld.store.currentWorldLocationID === 0 )
         {
-            leaveid = 34;
+            leaveid = 1;
             leavemessage = "Enter";
             //console.log( inquisitor.world );
         }
@@ -1652,6 +1769,95 @@ function begindisplay()
         if ( persistentworld.world.locationcurrentconcept[persistentworld.store.currentWorldLocationID] === undefined || persistentworld.world.locationcurrentconcept[persistentworld.store.currentWorldLocationID] === null )
         {
             persistentworld.world.locationcurrentconcept[persistentworld.store.currentWorldLocationID] = currentlocation.conceptids[0];
+        }
+    }
+
+    //
+
+    $( "#dialogue" ).hide();
+    $( "#dialoguefader1" ).hide();
+    $( "#dialoguefader2" ).hide();
+    $( "#dialoguedivider1" ).hide();
+    $( "#dialoguedivider2" ).hide();
+    indialogue = false;
+
+    if ( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).dialogueids.length > 0 )
+    {
+        console.log( "inquisitor: Found Dialogue(s)" );
+
+        for ( var dialogueindex = 0; dialogueindex < inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).dialogueids.length; dialogueindex++ )
+        {
+            console.log( "inquisitor: Found First Dialogue" );
+            var dialogueid = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).dialogueids[dialogueindex];
+            var rawdialogue = inquisitor.world.rawdialogue[dialogueid];
+
+            var allow = true;
+            if ( rawdialogue.requiresactivation )
+            {
+                var requiredtoken = rawdialogue.requiretokens[0];
+                var requiredtokeninversion = rawdialogue.requireinversion;
+
+                console.log( "inquisitor: Found Activation Requirement: " + requiredtoken );
+
+                var requiredtokenexists = ( persistentworld.tokens[requiredtoken] !== undefined && persistentworld.tokens[requiredtoken] !== null );
+                if ( requiredtokeninversion )
+                {
+                    console.log( "inquisitor: Found Activation Inversion" );
+                    requiredtokenexists = !requiredtokenexists;
+                }
+                allow = requiredtokenexists;
+            }
+
+            if ( allow )
+            {
+                console.log( "inquisitor: Allowing Dialogue, Length: " + rawdialogue.descriptionsegments.length + ". Text: " + rawdialogue.rawtext );
+                console.log( "inquisitor: Dialogue Progress: " + rawdialogue.readprogress );
+                console.log( rawdialogue.descriptionsegments );
+                if ( rawdialogue.readprogress < rawdialogue.descriptionsegments.length + 1 )
+                {
+                    console.log( "inquisitor: Continuing Dialogue" );
+
+                    $( "#dialogue" ).show();
+                    $( "#dialoguefader1" ).show();
+                    $( "#dialoguefader2" ).show();
+                    //$( "#dialoguedivider1" ).show();
+                    $( "#dialoguedivider2" ).show();
+                    indialogue = true;
+
+                    var sectionholderhtml = '';
+                    var dialoguecount = rawdialogue.descriptionsegments.length;
+                    for ( var dialogueindex = 1; dialogueindex < dialoguecount + 1; dialogueindex++ )
+                    {
+                        sectionholderhtml += "<h3 id='sectionone' class='" + ( rawdialogue.readprogress === dialogueindex ? 'activesection' : 'section' ) + "'></h3>";
+                    }
+
+                    $( "#sectionholder" ).html( sectionholderhtml );
+
+                    if ( rawdialogue.givetoken !== '' && rawdialogue.readprogress == rawdialogue.descriptionsegments.length )
+                    {
+                        persistentworld.tokens[rawdialogue.givetoken] = persistentworld.store.currentWorldLocationID;
+                    }
+
+                    if ( rawdialogue.soundurl !== '' && !soundmuted && rawdialogue.readprogress == 0 )
+                    {
+                        var sound = new buzz.sound( rawdialogue.soundurl.trim(), {
+                            formats: ["ogg", "mp3", "wav"]
+                        } );
+                        sound.play();
+
+                        console.log( "inquisitorParse: Playing sound: " + rawdialogue.soundurl );
+                    }
+
+                    if ( rawdialogue.readprogress === rawdialogue.descriptionsegments.length - 1 )
+                        tryachivement( rawdialogue.achievementname );
+
+                    var newtext = "" + processBodyText( rawdialogue.descriptionsegments.slice( rawdialogue.readprogress - 1, rawdialogue.readprogress ), false, false );
+                    $( "#note" ).html( newtext );
+                    rawdialogue.readprogress++;
+
+                    break;
+                }
+            }
         }
     }
 
@@ -1799,84 +2005,6 @@ function begindisplay()
         }
     }
 
-    $( "#dialogue" ).hide();
-    $( "#dialoguefader1" ).hide();
-    $( "#dialoguefader2" ).hide();
-    $( "#dialoguedivider1" ).hide();
-    $( "#dialoguedivider2" ).hide();
-    indialogue = false;
-
-    if ( inquisitor.getlocation(persistentworld.store.currentWorldLocationID).dialogueids.length > 0 )
-    {
-        console.log( "inquisitor: Found Dialogue(s)" );
-
-        for ( var dialogueindex = 0; dialogueindex < inquisitor.getlocation(persistentworld.store.currentWorldLocationID).dialogueids.length; dialogueindex++ )
-        {
-            console.log( "inquisitor: Found First Dialogue" );
-            var dialogueid = inquisitor.getlocation(persistentworld.store.currentWorldLocationID).dialogueids[dialogueindex];
-            var rawdialogue = inquisitor.world.rawdialogue[dialogueid];
-
-            var allow = true;
-            if ( rawdialogue.requiresactivation )
-            {
-                var requiredtoken = rawdialogue.requiretokens[0];
-                var requiredtokeninversion = rawdialogue.requireinversion;
-
-                console.log( "inquisitor: Found Activation Requirement: " + requiredtoken );
-
-                var requiredtokenexists = ( persistentworld.tokens[requiredtoken] !== undefined && persistentworld.tokens[requiredtoken] !== null );
-                if ( requiredtokeninversion )
-                {
-                    console.log( "inquisitor: Found Activation Inversion" );
-                    requiredtokenexists = !requiredtokenexists;
-                }
-                allow = requiredtokenexists;
-            }
-
-            if ( allow )
-            {
-                console.log( "inquisitor: Allowing Dialogue, Length: " + rawdialogue.text.length + ". Text: " + rawdialogue.rawtext );
-                console.log( "inquisitor: Dialogue Progress: " + rawdialogue.readprogress );
-
-                if ( rawdialogue.readprogress < rawdialogue.text.length )
-                {
-                    console.log( "inquisitor: Continuing Dialogue" );
-
-                    $( "#dialogue" ).show();
-                    $( "#dialoguefader1" ).show();
-                    $( "#dialoguefader2" ).show();
-                    //$( "#dialoguedivider1" ).show();
-                    $( "#dialoguedivider2" ).show();
-                    indialogue = true;
-
-                    if ( rawdialogue.givetoken !== '' )
-                    {
-                        persistentworld.tokens[rawdialogue.givetoken] = persistentworld.store.currentWorldLocationID;
-                    }
-
-                    if ( rawdialogue.soundurl !== '' && !soundmuted && rawdialogue.readprogress == 0 )
-                    {
-                        var sound = new buzz.sound( rawdialogue.soundurl.trim(), {
-                            formats: ["ogg", "mp3", "wav"]
-                        } );
-                        sound.play();
-
-                        console.log( "inquisitorParse: Playing sound: " + rawdialogue.soundurl );
-                    }
-
-                    if ( rawdialogue.readprogress === rawdialogue.text.length - 1 )
-                        tryachivement( rawdialogue.achievementname );
-
-                    var newtext = "<div class='dialogue'>" + processBodyText( rawdialogue.text[rawdialogue.readprogress], true, false ) + "\n\n</div>";
-                    $( "#dialogue" ).html( newtext );
-                    rawdialogue.readprogress++;
-
-                    break;
-                }
-            }
-        }
-    }
-
     //$( "#lastnote" ).html( inquisitor.getlocation(lastWorldLocationID].desc );
     //$( "#lastlastnote" ).html( inquisitor.getlocation(lastlastWorldLocationID].desc );
 
@@ -1928,14 +2056,6 @@ function clear()
     console.log( "inquisitor: Center: " + center );
     //$( "#div4" ).css( { "top": center } );
 
-    $( "#superlocation" ).html( "" );
-    $("#location").html("");
-    $( "#note" ).html( "" );
-    $( "#event" ).html( "" );
-    $( "#seperator" ).html( "" );
-    $( "#vessels" ).html( "" );
-    $( "#objects" ).html( "" );
-
     $( "#North" ).html( "" );
     $( "#South" ).html( "" );
     $( "#East" ).html( "" );
@@ -1957,9 +2077,17 @@ function clear()
     westvessels = 0;
     timelineeventsadded = 0;
 
+    $( "#superlocation" ).html( "" );
+    $( "#location" ).html( "" );
+    $( "#note" ).html( "" );
+    $( "#event" ).html( "" );
+    $( "#seperator" ).html( "" );
+    $( "#vessels" ).html( "" );
+    $( "#objects" ).html( "" );
     $( "#region" ).html( "" );
     $( "#subregion" ).html( "" );
     $( "#notenew" ).html( "" );
+    $( "#sectionholder" ).html( "" );
     
     addedlinks = 0;
     trueaddedlinks = 0;

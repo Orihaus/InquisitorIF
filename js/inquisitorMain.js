@@ -422,21 +422,36 @@ Inquisitor.prototype.processtimelineevent = function ( event )
     if ( !event.istimelineevent )
         return '';
 
-    var firsteventhtml = ( timelineeventsadded == 0 ? 'class="selected"' : '' );
-    var elementhtml = '<li ' + firsteventhtml + ' data-date="';
-    var datehtml = event.timeline.fulldate.day + "/" + event.timeline.fulldate.month + "/" + event.timeline.fulldate.year + '">';
-    elementhtml += datehtml + '<h1>' + event.timeline.title + "</h1>";
-    elementhtml += '<em>' + event.timeline.displaydate + "</em>";
+    var firsteventhtml = ( truetimelineeventsadded == 0 ? ' class="active selected"' : 'class="active"' );
+    var datehtml = event.timeline.fulldate.day + "/" + event.timeline.fulldate.month + "/" + event.timeline.fulldate.year + '"';
+    var elementhtml = '<li id="' + datehtml + firsteventhtml + ' data-date="';
+    elementhtml += datehtml + '><h1>' + event.timeline.title + "</h1>";
+    //elementhtml += '<em>' + event.timeline.displaydate + "</em>";
 
     var processedeventtext = processdescriptiontext( event.text, false );
     elementhtml += '<p>' + processedeventtext + '</p></li>';
 
     //
 
-    var referencehtml = '<li><a href="#0" ' + firsteventhtml + ' data-date="' + datehtml + event.timeline.displaydate + '</a></li>';
+    var referencehtml = '<li><a id="r' + timelineeventsadded + '" data="' + event.timeline.backgroundurl + '" href="#0" ' + firsteventhtml + ' data-date="' + datehtml + ">" + event.timeline.displaydate + '</a></li>';
 
     //console.log( referencehtml );
     //console.log( elementhtml );
+
+    timelineeventsadded++;
+    truetimelineeventsadded++;
+
+    return { ref: referencehtml, elem: elementhtml };
+}
+
+Inquisitor.prototype.processtimelineeventempty = function ( year )
+{
+    var datehtml = "01/01/" + year + '"';
+    var referencehtml = '<li><a class="inactive" id="r' + timelineeventsadded + '" href="#0" data-date="' + datehtml + ">" + year + '</a></li>';
+    var elementhtml = '<li id="' + datehtml + ' data-date="';
+    elementhtml += datehtml + '><h1>' + year + "</h1>";
+    //elementhtml += '<em>' + year + "</em>";
+    elementhtml += '<p> </p></li>';
 
     timelineeventsadded++;
 
@@ -447,16 +462,31 @@ Inquisitor.prototype.updatetimeline = function ()
 {
     var finalreferencehtml = '<ol>';
     var finaltimelinehtml = '<ol>';
+
+    var year = 1900;
+
     for ( var index in inquisitor.world.rawevents )
     {
-        var result = inquisitor.processtimelineevent( inquisitor.world.rawevents[index] );
+        if ( !inquisitor.world.rawevents[index].istimelineevent )
+            continue;
 
+        var eventyear = inquisitor.world.rawevents[index].timeline.fulldate.year;
+        while ( year <= eventyear )
+        {
+            var result = inquisitor.processtimelineeventempty( year );
+            finalreferencehtml += result.ref;
+            finaltimelinehtml += result.elem;
+            year++;
+        }
+
+        var result = inquisitor.processtimelineevent( inquisitor.world.rawevents[index] );
         if ( result != '' )
         {
             finalreferencehtml += result.ref;
             finaltimelinehtml += result.elem;
         }
     }
+
     finalreferencehtml += '</ol>';
     finaltimelinehtml += '</ol>';
 

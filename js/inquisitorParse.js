@@ -818,7 +818,9 @@ var inquisitorParse = function ( inputsource, maincallback )
                         {
                             if ( !checkempty( currentdescriptionsegment.trim() ) )
                             {
-                                var olddescriptionsegment = { text: currentdescriptionsegment.trimRight(), requiresactivation: false, active: true, postactivationtext: '', islink: false }
+                                var isabreak = ( currentdescriptionsegment.trim() === '-' );
+
+                                var olddescriptionsegment = { text: currentdescriptionsegment.trimRight(), requiresactivation: false, active: true, postactivationtext: '', islink: false, isbreak: isabreak }
                                 location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = '';
                             }
                         }
@@ -952,11 +954,18 @@ var inquisitorParse = function ( inputsource, maincallback )
                                 next();
                 event.timeline.fulldate.month = ch + processconditional( '/' ),
                                 next();
-                event.timeline.fulldate.year = ch + processconditional( '\n' ).trim();
+                event.timeline.fulldate.year = ch + processconditional( '\n', '|' ).trim();
+
+                event.timeline.backgroundurl = '';
+                if ( ch === '|' )
+                {
+                    next();
+                    event.timeline.backgroundurl = ch + processconditional( '\n' ).trim();
+                }
 
                 next();
 
-                console.log( "inquisitorParse: Found timeline event. Title: " + event.timeline.title + " Display Date: " + event.timeline.displaydate + " Full Date: " );
+                console.log( "inquisitorParse: Found timeline event. Title: " + event.timeline.title + " Display Date: " + event.timeline.displaydate + " Background URL: " + event.timeline.backgroundurl + " Full Date: " );
                 console.log( event.timeline.fulldate );
             }
 
@@ -988,7 +997,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                 next();
             }
 
-            while ( ch !== '#' && ch !== '[' && ch !== '`' && at < text.length )
+            while ( ch !== '#' && ch !== '[' && ch !== '`' && ch !== '/' && at < text.length )
             {
                 if ( ch === '@' )
                 {
@@ -1038,17 +1047,36 @@ var inquisitorParse = function ( inputsource, maincallback )
         dialogue.rawtext = "";
         dialogue.id = result.rawdialogue.length;
         dialogue.locationid = result.rawlocations.length;
-        dialogue.readprogress = 0;
+        dialogue.readprogress = 1;
         dialogue.givetoken = '';
         dialogue.soundurl = '';
         dialogue.achievementname = '';
         dialogue.requiretokens = [];
         dialogue.requiresactivation = false;
+        dialogue.descriptionsegments = [];
 
         next();
 
-        dialogue.rawtext += ch;
-        dialogue.rawtext += processconditional( ':' );
+        var currentdescriptionsegment = "";
+        while ( ch !== ':' )
+        {
+            currentdescriptionsegment += ch;
+            dialogue.rawtext += ch;
+
+            if ( ch === '\n' && !checkempty( currentdescriptionsegment.trim() ) )
+            {
+                var olddescriptionsegment = { text: currentdescriptionsegment.trim(), requiresactivation: false, active: true, postactivationtext: '', islink: false }
+                dialogue.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = '';
+            }
+
+            next();
+        }
+
+        if ( !checkempty( currentdescriptionsegment.trim() ) )
+        {
+            var olddescriptionsegment = { text: currentdescriptionsegment.trim(), requiresactivation: false, active: true, postactivationtext: '', islink: false }
+            dialogue.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = '';
+        }
 
         next();
 
@@ -1096,7 +1124,7 @@ var inquisitorParse = function ( inputsource, maincallback )
             }
         }
 
-        dialogue.text = dialogue.rawtext.split( '\n');
+        //dialogue.text = dialogue.rawtext.split( '\n');
 
         console.log( "inquisitorParse: Found dialogue text: " + dialogue.rawtext );
         result.rawdialogue.push( dialogue );

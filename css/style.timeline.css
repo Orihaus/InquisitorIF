@@ -55,7 +55,7 @@ Main Components
 .cd-horizontal-timeline.loaded {
   /* show the timeline after events position has been set (using JavaScript) */
   opacity: 1;
-  margin: 0 auto 100em auto;
+  margin: 0 auto 1000em auto;
   height: auto;
 }
 .cd-horizontal-timeline .timeline {
@@ -136,28 +136,34 @@ background-color: rgba(0, 0, 0, 0);
 }
 .cd-horizontal-timeline .events a {
   position: absolute;
-  bottom: -50px;
+  bottom: 0px;
   z-index: 2;
   text-align: center;
   font-size: 0.7rem;
-  padding-bottom: 4px;
+  padding-bottom: 5px;
   line-height: 1em;
-  padding-right: 5px;
   color: #eee;
-  /* fix bug on Safari - text flickering while timeline translates */
-  -webkit-transform: translateZ(0);
-  -moz-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  -o-transform: translateZ(0);
-  transform: translateZ(0);
-      transform: rotate(-90deg);
+  width: 55px;
+      transform: rotate(-90deg) translateX(50%) translateX(0px) translateZ(0);
         border-bottom: 1px solid #aaa;
 }
+
+.cd-horizontal-timeline .events a.inactive 
+{
+    border-bottom: 1px solid #111;
+      transform: rotate(-90deg) translateX(50%) translateX(-80px) translateZ(0);
+}
+
+.cd-horizontal-timeline .events a.inactive::before 
+{
+  content: '';
+}
+
 .cd-horizontal-timeline .events a::before {
   /* this is used to create the event spot */
   content: '-';
   position: absolute;
-  left: 100%;
+  left: -35px;
   right: auto;
   height: 8px;
   width: 8px;
@@ -171,13 +177,9 @@ background-color: rgba(0, 0, 0, 0);
   background-color: #fff;
   border-color: #fff;
 }
-.cd-horizontal-timeline .events a.selected {
+.cd-horizontal-timeline .events a.selected::before  {
   pointer-events: none;
-  content: '-';
-}
-.cd-horizontal-timeline .events a.selected::before {
   content: '>';
-  left: -15px;
 }
 .cd-horizontal-timeline .events a.older-event::after {
         border-bottom: 1px solid #aaa;
@@ -257,9 +259,10 @@ background-color: rgba(0, 0, 0, 0);
 }
 
 .cd-horizontal-timeline .events-content {
-  position: relative;
+  position: fixed;
   width: 100%;
-  margin: 8em 0;
+  height: 100% !important;
+  padding: 5em 0;
   overflow: hidden;
   -webkit-transition: height 0.4s;
   -moz-transition: height 0.4s;
@@ -268,6 +271,7 @@ background-color: rgba(0, 0, 0, 0);
 .cd-horizontal-timeline .events-content p {
     text-align: justify !important;
     white-space:pre-wrap;
+    height: auto;
     color: #e1e1e1;
       font-size:15px; 
        -moz-column-count: 1;
@@ -280,11 +284,19 @@ background-color: rgba(0, 0, 0, 0);
        -webkit-column-rule-color:  #222;
        -webkit-column-rule-style: solid ;
        -webkit-column-rule-width:  1px;
-            border-left: medium double #a69471;
+            border-left: 1px solid rgba( 64, 64, 64, 0.5 );
             padding-left: 20px;
-            max-width: 500px !important;
-  margin: -10px 0 0 52.5%;
+            max-width: 550px !important;
+  margin: 25% 0 25% 55.25%;
+  transform: translateY(-40.0%);
 }
+
+.cd-horizontal-timeline .events-content first 
+{
+    font-size: 100%;
+    text-transform:uppercase;
+}
+
 .cd-horizontal-timeline .events-content p:not(.history):not(.destinations):not(.dialogue):not(.excludefirst):not(.continueprompt):first-letter { 
     padding:12px 8px 0px 4px;
     margin-right: 8px;
@@ -318,7 +330,11 @@ background-color: rgba(0, 0, 0, 0);
 }
 .cd-horizontal-timeline .events-content li.selected {
   /* visible event content */
-  position: relative;
+  height: 100%;
+  overflow: hidden;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
   z-index: 2;
   opacity: 1;
   -webkit-transform: translateX(0);
@@ -344,21 +360,26 @@ background-color: rgba(0, 0, 0, 0);
 }
 .cd-horizontal-timeline .events-content li > * {
 }
-.cd-horizontal-timeline .events-content h1 {
-    position:relative;
+.cd-horizontal-timeline .events-content h1 
+{
+    width:50%;
+  font-size: 1.5em;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 0px; left: 50%; bottom: 0px; right: 0;
+
     text-align: right !important;
-  margin: 0 auto;
-    top: 60px;
-  transform: translateX(-50%);
-  left: -10px;
     letter-spacing: 0.4em; 
-    font-size: 2.175em;
     color: #070707;
+    transform: translateX(-100%) translateX( -100px );
 }
 .cd-horizontal-timeline .events-content h1::before {
     /*background-color: #d6d6d6;*/
     transform:skewX(-0deg);
     opacity: 1.0;
+    height: 43px;
+    left: -70px;
 }
 .cd-horizontal-timeline .events-content em {
   font-style: italic;

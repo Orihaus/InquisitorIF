@@ -8,9 +8,9 @@ function trybegintimeline()
 
     timelinebegun = true;
 	var timelines = $('.cd-horizontal-timeline'),
-		eventsMinDistance = 50;
+		eventsMinDistance = 1;
 
-	(timelines.length > 0) && initTimeline(timelines);
+	( timelines.length > 0 ) && initTimeline( timelines );
 
 	function initTimeline(timelines) {
 		timelines.each(function(){
@@ -20,18 +20,26 @@ function trybegintimeline()
 			timelineComponents['timelineWrapper'] = timeline.find('.events-wrapper');
 			timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
 			timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
-			timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find('a');
+			timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find( 'a' );
 			timelineComponents['timelineDates'] = parseDate(timelineComponents['timelineEvents']);
 			timelineComponents['eventsMinLapse'] = minLapse(timelineComponents['timelineDates']);
 			timelineComponents['timelineNavigation'] = timeline.find('.cd-timeline-navigation');
-			timelineComponents['eventsContent'] = timeline.children('.events-content');
+			timelineComponents['eventsContent'] = timeline.children( '.events-content' );
+
+			console.log( timelineComponents['eventsWrapper'].find( '.active' ) );
+			console.log( timelineComponents['eventsWrapper'].find( 'a' ) );
 
 			//assign a left postion to the single events along the timeline
 			setDatePosition(timelineComponents, eventsMinDistance);
 			//assign a width to the timeline
 			var timelineTotWidth = setTimelineWidth(timelineComponents, eventsMinDistance);
 			//the timeline has been initialize - show it
-			timeline.addClass('loaded');
+			timeline.addClass( 'loaded' );
+
+			$.smoothScroll( {
+			    scrollElement: $( '.content' ),
+			    offset: findcenter( '.selected' ),
+			} );
 
 			//detect click on the next arrow
 			timelineComponents['timelineNavigation'].on('click', '.next', function(event){
@@ -65,9 +73,12 @@ function trybegintimeline()
 
 			//keyboard navigation
 			$(document).keyup(function(event){
-				if(event.which=='37' && elementInViewport(timeline.get(0)) ) {
-					showNewContent(timelineComponents, timelineTotWidth, 'prev');
-				} else if( event.which=='39' && elementInViewport(timeline.get(0))) {
+			    if ( event.which == '37' ) //elementInViewport( timeline.get( 0 ) ) 
+			    {
+			        showNewContent( timelineComponents, timelineTotWidth, 'prev' );
+			    }
+			    else if ( event.which == '39' )
+			    {
 					showNewContent(timelineComponents, timelineTotWidth, 'next');
 				}
 			});
@@ -88,23 +99,58 @@ function trybegintimeline()
 		//go from one event to the next/previous one
 		var visibleContent =  timelineComponents['eventsContent'].find('.selected'),
 			newContent = ( string == 'next' ) ? visibleContent.next() : visibleContent.prev();
+		var selectedDate = timelineComponents['eventsWrapper'].find( '.selected' );
 
-		if ( newContent.length > 0 ) { //if there's a next/prev event - show it
-			var selectedDate = timelineComponents['eventsWrapper'].find('.selected'),
-				newEvent = ( string == 'next' ) ? selectedDate.parent('li').next('li').children('a') : selectedDate.parent('li').prev('li').children('a');
+		if ( newContent.length > 0 )
+		{ //if there's a next/prev event - show it
+		    var currentli = selectedDate.parent( 'li' );
+		    var findingnextactive;
+		    var safety = 0;
+
+		    if ( string == 'next' )
+		    {
+		        while ( safety < 100 )
+		        {
+		            currentli = currentli.next( 'li' );
+		            findingnextactive = currentli.children( '.active' );
+
+		            if( findingnextactive.length !== 0 )
+		            {
+		                break;
+		            }
+		            safety++;
+		        }
+		    }
+		    else
+		    {
+		        while ( safety < 100 )
+		        {
+		            currentli = currentli.prev( 'li' );
+		            findingnextactive = currentli.children( '.active' );
+
+		            if ( findingnextactive.length !== 0 )
+		            {
+		                break;
+		            }
+		            safety++;
+		        }
+		    }
+		    var newEvent = findingnextactive;
+
+		    console.log( newEvent );
 			
 			updateFilling(newEvent, timelineComponents['fillingLine'], timelineTotWidth);
 			updateVisibleContent(newEvent, timelineComponents['eventsContent']);
 			newEvent.addClass('selected');
 			selectedDate.removeClass('selected');
 			updateOlderEvents(newEvent);
-			updateTimelinePosition(string, newEvent, timelineComponents);
+			updateTimelinePosition( string, newEvent, timelineComponents );
 		}
 	}
 
 	function updateTimelinePosition(string, event, timelineComponents) {
 		//translate timeline to the left/right according to the position of the selected event
-		var eventStyle = window.getComputedStyle(event.get(0), null),
+		/*var eventStyle = window.getComputedStyle(event, null),
 			eventLeft = Number(eventStyle.getPropertyValue("left").replace('px', '')),
 			timelineWidth = Number(timelineComponents['timelineWrapper'].css('width').replace('px', '')),
 			timelineTotWidth = Number(timelineComponents['eventsWrapper'].css('width').replace('px', ''));
@@ -112,14 +158,25 @@ function trybegintimeline()
 
         if( (string == 'next' && eventLeft > timelineWidth - timelineTranslate) || (string == 'prev' && eventLeft < - timelineTranslate) ) {
         	translateTimeline(timelineComponents, - eventLeft + timelineWidth/2, timelineWidth - timelineTotWidth);
-        }
+        }*/
+
+	    var eventid = event.get( 0 ).id;
+	    //var textbodylocation = findcenter( '#' + eventidcorrected 
+	    console.log( event.attr( "data" ) );
+	    backgroundimageurltimeline = backgroundimageurl = event.attr( "data" );
+	    redrawbackground();
+
+        $.smoothScroll( {
+            scrollElement: $( '.content' ),
+            offset: findcenter( '#' + eventid ),
+        } );
 	}
 
 	function translateTimeline(timelineComponents, value, totWidth) {
 		var eventsWrapper = timelineComponents['eventsWrapper'].get(0);
 		value = (value > 0) ? 0 : value; //only negative translate value
 		value = ( !(typeof totWidth === 'undefined') &&  value < totWidth ) ? totWidth : value; //do not translate more than timeline width
-		setTransformValue(eventsWrapper, 'translateX', value+'px');
+		//setTransformValue(eventsWrapper, 'translateX', value+'px');
 		//update navigation arrows visibility
 		(value == 0 ) ? timelineComponents['timelineNavigation'].find('.prev').addClass('inactive') : timelineComponents['timelineNavigation'].find('.prev').removeClass('inactive');
 		(value == totWidth ) ? timelineComponents['timelineNavigation'].find('.next').addClass('inactive') : timelineComponents['timelineNavigation'].find('.next').removeClass('inactive');
@@ -136,10 +193,13 @@ function trybegintimeline()
 	}
 
 	function setDatePosition(timelineComponents, min) {
-		for (i = 0; i < timelineComponents['timelineDates'].length; i++) { 
+	    for ( i = 0; i < timelineComponents['timelineDates'].length; i++ )
+	    {
 		    var distance = daydiff(timelineComponents['timelineDates'][0], timelineComponents['timelineDates'][i]),
 		    	distanceNorm = Math.round(distance/timelineComponents['eventsMinLapse']) + 2;
-		    timelineComponents['timelineEvents'].eq(i).css('left', distanceNorm*min+'px');
+		    timelineComponents['timelineEvents'].eq( i ).css( 'left', distanceNorm * min + 'px' );
+
+		    console.log( timelineComponents['timelineEvents'].eq( i ) );
 		}
 	}
 
@@ -232,7 +292,7 @@ function trybegintimeline()
 	}
 
 	function daydiff(first, second) {
-	    return Math.round((second-first));
+	    return Math.round(( second - first ) / ( 1000 * 60 * 60 * 24 ) );
 	}
 
 	function minLapse(dates) {

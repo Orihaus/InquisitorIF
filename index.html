@@ -52,8 +52,8 @@
 	<title></title>
 </head>
 <body onload="forceRefresh();">
-    <div id="background" class="background"></div>
-    <div id="backgroundoffsetcontainer" class="backgroundoffsetcontainer"><div id="backgroundoffset" class="backgroundoffset"><div id="backgroundoffsetdouble" class="backgroundoffsetdouble"></div></div></div>
+    <div id="backgroundprimary" class="background"></div>
+    <div id="backgroundsecondary" class="background"></div>
     <div id="backgroundvignette" class="backgroundvignette"></div>
     <div id="backgroundbordercontainer"></div>
     <span id="exitprompt" class="prompt"></span>
@@ -65,28 +65,11 @@
                     <div class="timeline">
                         <div class="events-wrapper">
                             <div class="events">
-                                <div id='timelinediamond'>
-                                    <span class="diamondradial"></span><span class="diamondradial circle"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-20deg );"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-40deg );"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-60deg );"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-80deg );"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-100deg);"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-120deg);"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-140deg);"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-160deg);"></span>
-                                    <span class="diamondradial diamondline" style="transform: rotate(-180deg);"></span>
-                                </div>
                                 <div class="events-references" id="events-references">
                                 </div>
                                     <span class="filling-line" aria-hidden="true"></span>
                                 </div> <!-- .events -->
                         </div> <!-- .events-wrapper -->
-
-                        <ul class="cd-timeline-navigation">
-                            <li><a href="#0" class="prev inactive">Prev</a></li>
-                            <li><a href="#0" class="next">Next</a></li>
-                        </ul> <!-- .cd-timeline-navigation -->
                     </div> <!-- .timeline -->
                 </div>
             </div>
@@ -95,13 +78,12 @@
 </section>
         <div id="core">
             <div id="div4">
-                <h4 id='superlocation'></h4>
-                <div class='headerbox'><h1 id='location'></h1></div>
+                <div class='headerbox'><h4 id='superlocation'></h4><h1 id='location'></h1><div id='sectionholder'>
+                    </div></div>
                 <hr class="style-eight">
                 <p id='dialoguefader1' class='dialoguefader'></p>
                 <p id='dialogue' class='dialogue'></p>
                 <p id='dialoguefader2' class='dialoguefader'></p>
-                <hr id='dialoguedivider2' class="style-eight">
                 <div id='eventmaster'><p id='event'></p></div>
                 <p id='note'><div id='noteline'></div></p>
                 <p id='notenew' class="excludefirst" />
@@ -109,40 +91,40 @@
                 <p id='objects' class='destinations'></p>
                 <p id='vessels' class='destinations'></p>
                 <hr id='endofnote' class="style-two">
-                <div id='diamondcontainer'>
-                    <div id="diamond" class='diamond'>
-                        <span class="diamondradial"></span>
-                        <span class="diamondradial circle"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-10deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-20deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-30deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-40deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-50deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-60deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-70deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-80deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-90deg );"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-100deg);"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-110deg);"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-120deg);"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-130deg);"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-140deg);"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-150deg);"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-160deg);"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-170deg);"></span>
-                        <span class="diamondradial diamondline" style="transform: rotate(-180deg);"></span>
-                    </div>
-                    <div id='diamondtextcontainer'>
-                        <div class='diamonddirection' id='diamondnorth'><p id='NorthIndictator' class='direction directionalt'>N</p><p id='North' class='destinations directional directionalt'></p></div>
-                        <div class='diamonddirection' id='diamondsouth'><p id='SouthIndictator' class='direction'>S</p><p id='South' class='destinations directional'></p></div>
-                        <div class='diamonddirection' id='diamondeast' ><p id='EastIndictator' class='direction'>E</p><p id='East' class='destinations directional'></p></div>
-                        <div class='diamonddirection' id='diamondwest' ><p id='WestIndictator' class='direction directionalt'>W</p><p id='West' class='destinations directional directionalt'></p></div>
-                    </div>
-                    <div id='lyscontainer'>
-                        <div class='diamond' id="lysdiamondouter"><div class='diamond' id="lysdiamond"><p id="lyscounter">II</p></div></div>
-                    </div>
                 </div>
-            <canvas id="forceRefresh" width="1" height="1"></canvas>
-    </div>
+            <div id='diamondcontainer'>
+                <div id="diamond" class='diamond'>
+                    <span class="diamondradial"></span>
+                    <span class="diamondradial circle"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-10deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-20deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-30deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-40deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-50deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-60deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-70deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-80deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-90deg );"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-100deg);"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-110deg);"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-120deg);"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-130deg);"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-140deg);"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-150deg);"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-160deg);"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-170deg);"></span>
+                    <span class="diamondradial diamondline" style="transform: rotate(-180deg);"></span>
+                </div>
+                <div id='diamondtextcontainer'>
+                    <div class='diamonddirection' id='diamondnorth'><p id='NorthIndictator' class='direction directionalt'>N</p><p id='North' class='destinations directional directionalt'></p></div>
+                    <div class='diamonddirection' id='diamondsouth'><p id='SouthIndictator' class='direction'>S</p><p id='South' class='destinations directional'></p></div>
+                    <div class='diamonddirection' id='diamondeast'><p id='EastIndictator' class='direction'>E</p><p id='East' class='destinations directional'></p></div>
+                    <div class='diamonddirection' id='diamondwest'><p id='WestIndictator' class='direction directionalt'>W</p><p id='West' class='destinations directional directionalt'></p></div>
+                </div>
+                <div id='lyscontainer'>
+                    <div class='diamond' id="lysdiamondouter"><div class='diamond' id="lysdiamond"><p id="lyscounter">II</p></div></div>
+                </div>
+                <canvas id="forceRefresh" width="1" height="1"></canvas>
+            </div>
 </body>
 </html>
