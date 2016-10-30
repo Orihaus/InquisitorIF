@@ -1,6 +1,47 @@
 function Inquisitor( )
 {
-    //inquisitor.world = {};
+    this.logic = {
+      combinationstore: {},
+      indialogue: false,
+      currenteventactive: false,
+      soundmuted: false,
+      viewingtimeline: true,
+
+      escapekeyheldfor: 0,
+
+      lastlastWorldLocationID: 0,
+      lastWorldLocationID: 0,
+
+      trueaddedlinks: 0,
+      addedlinks: 0,
+      northvessels: 0,
+      southvessels: 0,
+      eastvessels: 0,
+      westvessels: 0,
+
+      savedlocation: -1,
+      isincredits: false,
+      conceptlinksdisplayed: false,
+      conceptsover: false,
+      currentlocationprogress: 0,
+      currentconceptprogress: 0,
+      istransitioning: false
+    };
+
+    this.render = {
+      finaldescriptionsegments: {},
+      expanddescription: true,
+      lastmousepagex: 0,
+      lastmousepagey: 0,
+      backgroundimageurltimeline: '',
+      backgroundimageurl: '',
+      color: "#a69471",
+      currentbackgroundbuffer: "backgroundprimary",
+      timelineeventsadded: 0,
+      truetimelineeventsadded: 0,
+      showingvessels: false,
+      lastbackground: ''
+    };
 };
 var inquisitor = new Inquisitor();
 
@@ -8,18 +49,37 @@ Inquisitor.prototype.initialize = function ( url, callback )
 {
     inquisitor.callback = callback;
     inquisitor.url = url;
-    inquisitorParse( inquisitor.url, inquisitor.finishedParsing );
+    inquisitor.parse( inquisitor.url, inquisitor.finishedParsing );
 }
 
 Inquisitor.prototype.finishedParsing = function ( result )
 {
     inquisitor.world = result;
-    console.log( inquisitor.world );
     inquisitor.rebuildregions();
     inquisitor.rebuildentities( persistentworld.entity.locations );
     //inquisitor.callback();
-    begindisplay();
-    displayWorld();
+    inquisitor.loadpersistent();
+    inquisitor.initializeInteraction();
+
+    inquisitor.render.color = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).color;
+
+    inquisitor.begindisplay();
+    //inquisitor.displayworld();
+}
+
+Inquisitor.prototype.displayworld = function( raw, index )
+{
+    inquisitor.crossfadeelement( $( "#core" ), 1500, 500, null, true );
+    //inquisitor.begindisplay();
+    console.log('inquisitor: displayworld()');
+}
+
+Inquisitor.prototype.createagent = function( raw, index )
+{
+    /*var newagent = new inquisitoragent();
+    newagent.phraseraw( raw, index );
+
+    inquisitor.world.agents[newagent.name] = newagent;*/
 }
 
 Inquisitor.prototype.getlocation = function ( index )
@@ -65,7 +125,7 @@ Inquisitor.prototype.tryfindmutuallink = function ( linktargetid, location )
         return mutuallink3;
     }
 
-    //console.log( "inquisitor: No mutual link found from: " + inquisitor.world.rawlocations[linktargetid].name + " to: " + location.name );
+    console.log( "inquisitor: No mutual link found from: " + inquisitor.world.rawlocations[linktargetid].name + " to: " + location.name );
 
     return null;
 }
@@ -145,7 +205,7 @@ Inquisitor.prototype.findinregions = function ( id, searchoffset )
 
     var region = inquisitor.world.regions;
     var regionarray = [];
-    
+
     //console.log( 'inquisitor: findinregions searching for region info of location, ' + location.name + ' with search offset ' + searchoffset );
     //console.log( location.namesegments );
 
@@ -188,12 +248,12 @@ Inquisitor.prototype.recursiveupwardsrecieve = function ( locationid, variable, 
     {
         if ( parent[variable] !== valueunused && parent[variable] !== undefined && parent[variable] !== null )
         {
-            //console.log( 'inquisitor: recursiveupwardsrecieve found value, ' + parent[variable] + ' at ' + parent.name + ' returning.' )
+            console.log( 'inquisitor: recursiveupwardsrecieve found value, ' + parent[variable] + ' at ' + parent.name + ' returning.' )
             return parent[variable];
         }
         else
         {
-            //console.log( 'inquisitor: recursiveupwardsrecieve found undefined, at ' + parent.name + ' continuing upwards. Depth: ' + depth )
+            console.log( 'inquisitor: recursiveupwardsrecieve found undefined, at ' + parent.name + ' continuing upwards. Depth: ' + depth )
             return inquisitor.recursiveupwardsrecieve( locationid, variable, valueunused, depth );
         }
     }
@@ -236,7 +296,7 @@ Inquisitor.prototype.enumeratechildren = function ( id )
         {
             if ( childid != -1 )
             {
-                console.log( "inquisitor: Enumerating Child: " + childid );
+                //console.log( "inquisitor: Enumerating Child: " + childid );
                 childrenfound.push( childid );
             }
         }
@@ -248,7 +308,7 @@ Inquisitor.prototype.enumeratechildren = function ( id )
 Inquisitor.prototype.traverselinearlocation = function ()
 {
     persistentworld.world.linearlocationprogress++;
-    console.log( inquisitor.world.linearlocations );
+    //console.log( inquisitor.world.linearlocations );
     return inquisitor.world.linearlocations[persistentworld.world.linearlocationprogress-1];
 }
 
@@ -330,7 +390,7 @@ Inquisitor.prototype.processlinkadditions = function ( id )
             linklocationid = inquisitor.findlocationbytitle( link.target );
         }
 
-        if ( linklocationid != -1 )
+        if ( linklocationid != -1 && !link.inlinelinkreference )
         {
             var finallinktitle = link.title === '' ? inquisitor.world.rawlocations[linklocationid].name : link.title;
 
@@ -346,100 +406,29 @@ Inquisitor.prototype.processlinkadditions = function ( id )
     return availableadditions;
 }
 
-Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocationindex, initiatinglink, forcelink, ignorestate )
-{
-    var result = {};
-    result.mutual = false;
-    result.mutualdirection = -1;
-    result.title = "";
-    result.combinationconditional = false;
-    result.success = false;
-
-    var mutuallink = inquisitor.tryfindmutuallink( targetlocationindex, inquisitor.world.rawlocations[startlocationindex] );
-    if ( mutuallink !== undefined && mutuallink !== null )
-    {
-        result.mutual = true;
-        result.mutualdirection = intdirectioninvert( mutuallink.linkdirection );
-        console.log( "inquisitor: Found mutual link from: " + inquisitor.world.rawlocations[targetlocationindex].name + ". Direction: " + inttodirection( result.mutualdirection ) );
-    }
-
-    if ( initiatinglink !== undefined && initiatinglink !== null )
-    {
-        if ( initiatinglink.hasconditional )
-        {
-            var hastoken = !( persistentworld.tokens[initiatinglink.conditional] === undefined || persistentworld.tokens[initiatinglink.conditional] === null );
-            if ( !hastoken && !initiatinglink.exclusionconditional )
-            {
-                if ( initiatinglink.combinationcondition )
-                {
-                    result.combinationconditional = true;
-                }
-                else
-                {
-                    console.log( "inquisitor: Condition: " + initiatinglink.conditional + ". Not met" );
-                    return result;
-                }
-            }
-            if ( hastoken && link.exclusionconditional )
-            {
-                console.log( "inquisitor: Exclusion Condition: " + initiatinglink.conditional + ". Met" );
-                return result;
-            }
-        }
-
-        result.title = initiatinglink.title;
-    }
-    else if ( !forcelink && !result.mutual )
-    {
-        console.log( "inquisitor: Link not requested" );
-        return result;
-    }
-
-    if ( inquisitor.world.rawlocations[targetlocationindex].hidden )
-    {
-        //console.log( "inquisitor: " + id + " is hidden." );
-        return result;
-    }
-
-    var targetstate = inquisitor.world.rawlocations[targetlocationindex].state.trim();
-    var currentstate = persistentworld.world.state.trim();
-    if ( targetstate !== currentstate && !ignorestate )
-    {
-        console.log( "inquisitor: attempting state change. From: " + currentstate + " to: " + targetstate );
-        if ( currentstate !== 'stateless' )
-        {
-            console.log( "inquisitor: state transversal denied." );
-            return result;
-        }
-    }
-
-    result.success = true;
-    return result;
-}
-
 Inquisitor.prototype.processtimelineevent = function ( event )
 {
     if ( !event.istimelineevent )
         return '';
 
-    var firsteventhtml = ( truetimelineeventsadded == 0 ? ' class="active selected"' : 'class="active"' );
+    var firsteventhtml = ( inquisitor.render.truetimelineeventsadded == 0 ? ' class="active selected"' : 'class="active"' );
     var datehtml = event.timeline.fulldate.day + "/" + event.timeline.fulldate.month + "/" + event.timeline.fulldate.year + '"';
     var elementhtml = '<li id="' + datehtml + firsteventhtml + ' data-date="';
     elementhtml += datehtml + '><h1>' + event.timeline.title + "</h1>";
     //elementhtml += '<em>' + event.timeline.displaydate + "</em>";
 
-    var processedeventtext = processdescriptiontext( event.text, false );
+    var processedeventtext = inquisitor.processdescriptiontext( event.text, false );
     elementhtml += '<p>' + processedeventtext + '</p></li>';
 
     //
 
-    var referencehtml = '<li><a id="r' + timelineeventsadded + '" data="' + event.timeline.backgroundurl + '" href="#0" ' + firsteventhtml + ' data-date="' + datehtml + ">" + event.timeline.displaydate + '</a></li>';
+    var referencehtml = '<li><a id="r' + inquisitor.render.timelineeventsadded + '" data="' + event.timeline.backgroundurl + '" href="#0" ' + firsteventhtml + ' data-date="' + datehtml + ">" + event.timeline.displaydate + '</a></li>';
 
     //console.log( referencehtml );
     //console.log( elementhtml );
 
-    timelineeventsadded++;
-    truetimelineeventsadded++;
+    inquisitor.render.timelineeventsadded++;
+    inquisitor.render.truetimelineeventsadded++;
 
     return { ref: referencehtml, elem: elementhtml };
 }
@@ -447,13 +436,13 @@ Inquisitor.prototype.processtimelineevent = function ( event )
 Inquisitor.prototype.processtimelineeventempty = function ( year )
 {
     var datehtml = "01/01/" + year + '"';
-    var referencehtml = '<li><a class="inactive" id="r' + timelineeventsadded + '" href="#0" data-date="' + datehtml + ">" + year + '</a></li>';
+    var referencehtml = '<li><a class="inactive" id="r' + inquisitor.render.timelineeventsadded + '" href="#0" data-date="' + datehtml + ">" + year + '</a></li>';
     var elementhtml = '<li id="' + datehtml + ' data-date="';
     elementhtml += datehtml + '><h1>' + year + "</h1>";
     //elementhtml += '<em>' + year + "</em>";
     elementhtml += '<p> </p></li>';
 
-    timelineeventsadded++;
+    inquisitor.render.timelineeventsadded++;
 
     return { ref: referencehtml, elem: elementhtml };
 }
@@ -463,7 +452,9 @@ Inquisitor.prototype.updatetimeline = function ()
     var finalreferencehtml = '<ol>';
     var finaltimelinehtml = '<ol>';
 
-    var year = 1900;
+    var year = -1;
+    var lastyear = -1;
+    var firstyear = -1;
 
     for ( var index in inquisitor.world.rawevents )
     {
@@ -471,6 +462,14 @@ Inquisitor.prototype.updatetimeline = function ()
             continue;
 
         var eventyear = inquisitor.world.rawevents[index].timeline.fulldate.year;
+
+        if( year === -1 )
+        {
+          year = eventyear;
+          firstyear = year;
+        }
+        lastyear = eventyear;
+
         while ( year <= eventyear )
         {
             var result = inquisitor.processtimelineeventempty( year );
@@ -487,6 +486,9 @@ Inquisitor.prototype.updatetimeline = function ()
         }
     }
 
+    eventsMinDistance = 1;
+    timelineventlapse = Math.round( ( lastyear - firstyear ) / 4 );
+
     finalreferencehtml += '</ol>';
     finaltimelinehtml += '</ol>';
 
@@ -501,14 +503,14 @@ Inquisitor.prototype.findlinks = function ( id )
     var siblings = inquisitor.enumeratesiblings( id ).siblingsfound;
     for( var index in siblings )
     {
-        console.log( "inquisitor: Found Sibling: " + siblings[index] );
+        //console.log( "inquisitor: Found Sibling: " + siblings[index] );
         potentiallinks.push( siblings[index] );
     }
 
     var children = inquisitor.enumeratechildren( id );
     for ( var index in children )
     {
-        console.log( "inquisitor: Found Child: " + children[index] );
+        //console.log( "inquisitor: Found Child: " + children[index] );
         potentiallinks.push( children[index] );
     }
 
@@ -533,8 +535,19 @@ Inquisitor.prototype.findlinks = function ( id )
 
     for ( var index in potentiallinks )
     {
+        var isduplicate = false;
+        for ( var indextwo in potentiallinks )
+        {
+          if( index !== indextwo )
+          {
+            isduplicate = ( potentiallinks[index] === potentiallinks[indextwo] );
+          }
+        }
+
+        console.log( "inquisitor: link to: " + potentiallinks[index] + ", isduplicate: " + isduplicate );
+
         var result = inquisitor.cantraverse( id, potentiallinks[index], null, true );
-        if( result.success )
+        if( result.success && !isduplicate)
         {
             //console.log( "inquisitor: Allowing link to: " + potentiallinks[index] );
             links.push( potentiallinks[index] );
@@ -564,12 +577,20 @@ Inquisitor.prototype.rebuildregions = function ()
     for ( var index in inquisitor.world.rawlocations )
     {
         var location = inquisitor.getlocation( index );
-        location.parentid = findparent( inquisitor.world, location );
+        location.parentid = inquisitor.findparent( inquisitor.world, location );
 
         var recievedbackgroundimage = inquisitor.recursiveupwardsrecieve( index, 'backgroundimage', '' );
         if ( recievedbackgroundimage !== null && recievedbackgroundimage !== undefined )
         {
             location.backgroundimage = recievedbackgroundimage;
+            console.log( "inquisitorParse: Found parent background: " + location.backgroundimage );
+        }
+
+        var recievedcolor = inquisitor.recursiveupwardsrecieve( index, 'color', '' );
+        if ( recievedcolor !== null && recievedcolor !== undefined )
+        {
+            location.color = recievedcolor;
+            console.log( "inquisitorParse: Found parent color: " + location.color );
         }
 
         var recievedstate = inquisitor.recursiveupwardsrecieve( index, 'state', 'stateless' );
@@ -578,9 +599,10 @@ Inquisitor.prototype.rebuildregions = function ()
             location.state = recievedstate;
             if ( location.state === 'linear' )
             {
-                console.log( "inquisitorParse: Found linear state. " );
+                //console.log( "inquisitorParse: Found linear state. " );
                 inquisitor.world.linearlocations.push( location.id );
             }
+            console.log( "inquisitorParse: Found parent state: " + location.state );
         }
 
         inquisitor.setlocation( index, location );
@@ -606,7 +628,7 @@ Inquisitor.prototype.placeentityinworld = function ( entityindex, locationindex 
     }
 
     entity.namesegments = namesegments;
-    entity = writelocationinfo( entity );
+    entity = inquisitor.writelocationinfo( entity );
 
     //
 
@@ -669,3 +691,129 @@ Inquisitor.prototype.updateentities = function ()
         }
     }
 }
+
+//
+
+Inquisitor.prototype.directiontoint = function ( direction )
+{
+    switch ( direction )
+    {
+        case "North":
+            return 1;
+        case "East":
+            return 2;
+        case "South":
+            return 3;
+        case "West":
+            return 4;
+        case "Up":
+            return 5;
+        case "Down":
+            return 6;
+    }
+
+    return 0;
+}
+
+Inquisitor.prototype.intdirectioninvert = function ( int )
+{
+    switch ( int )
+    {
+        case 1:
+            return 3;
+        case 2:
+            return 4;
+        case 3:
+            return 1;
+        case 4:
+            return 2;
+        case 5:
+            return 6;
+        case 6:
+            return 5;
+    }
+
+    return 0;
+}
+
+Inquisitor.prototype.inttodirection = function ( int )
+{
+    switch ( int )
+    {
+        case 1:
+            return "North";
+        case 2:
+            return "East";
+        case 3:
+            return "South";
+        case 4:
+            return "West";
+        case 5:
+            return "Up";
+        case 6:
+            return "Down";
+    }
+
+    return "Stationary";
+}
+
+Inquisitor.prototype.writelocationinfo = function ( location )
+{
+    location.fullname = "";
+    for ( var index in location.namesegments )
+    {
+        location.fullname += location.namesegments[index] + ( ( index < location.namesegments.length - 1 ) ? " - " : "" );
+    }
+    //console.log( "inquisitorParse: Recreated full name: " + location.fullname );
+
+    location.region = location.namesegments[0];
+    location.subregion = location.namesegments[1];
+    location.name = location.namesegments[location.namesegments.length - 1];
+
+    //console.log( "inquisitorParse: Found location region: " + location.region );
+    //console.log( "inquisitorParse: Found location name: " + location.name );
+
+    return location;
+};
+
+Inquisitor.prototype.findparent = function ( result, location )
+{
+    var regionceptiondepth = 0;
+    var parentregionception;
+    var regionception = result.regions;
+    var lastid = -1;
+
+    while ( regionceptiondepth < location.namesegments.length )
+    {
+        if ( regionception.children === null || regionception.children === undefined )
+        {
+            regionception.children = {};
+        }
+
+        if ( !( regionception.children.hasOwnProperty( location.namesegments[regionceptiondepth] ) ) )
+        {
+                regionception.children[location.namesegments[regionceptiondepth]] = {
+                    id: location.id,
+                    firstid: location.id,
+                    isobject: location.isobject,
+                    backgroundimage: location.backgroundimage,
+                    color: location.color,
+                    state: location.state,
+                    children: {},
+                    parentid: lastid,
+                    name: location.namesegments[regionceptiondepth]
+                };
+        }
+
+        if ( !regionception.children[location.namesegments[regionceptiondepth]].isobject )
+        {
+            lastid = regionception.children[location.namesegments[regionceptiondepth]].id;
+        }
+
+        parentregionception = regionception;
+        regionception = regionception.children[location.namesegments[regionceptiondepth]];
+        regionceptiondepth++;
+    }
+
+    return parentregionception.id;
+};

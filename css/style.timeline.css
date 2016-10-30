@@ -1,4 +1,4 @@
-/* -------------------------------- 
+/* --------------------------------
 
 Primary style
 
@@ -12,7 +12,7 @@ a {
   text-decoration: none;
 }
 
-#timelinediamond 
+#timelinediamond
 {
     width: 40px;
     height: 40px;
@@ -25,19 +25,19 @@ a {
     position: relative;
     margin: 0 auto;
     display: table;
-    text-align: center; 
+    text-align: center;
     padding-bottom: 0px;
-    text-transform: uppercase; 
-    font-family: 'Cinzel', sans-serif; 
-    font-weight:200; 
-    letter-spacing: 0.25em; 
+    text-transform: uppercase;
+    font-family: 'Cinzel', sans-serif;
+    font-weight:200;
+    letter-spacing: 0.25em;
     line-height:1.07em;
     z-index:-1000;
 }
 
-/* -------------------------------- 
+/* --------------------------------
 
-Main Components 
+Main Components
 
 -------------------------------- */
 .cd-horizontal-timeline {
@@ -148,13 +148,13 @@ background-color: rgba(0, 0, 0, 0);
         border-bottom: 1px solid #aaa;
 }
 
-.cd-horizontal-timeline .events a.inactive 
+.cd-horizontal-timeline .events a.inactive
 {
     border-bottom: 1px solid #111;
       transform: rotate(-90deg) translateX(50%) translateX(-80px) translateZ(0);
 }
 
-.cd-horizontal-timeline .events a.inactive::before 
+.cd-horizontal-timeline .events a.inactive::before
 {
   content: '';
 }
@@ -273,7 +273,7 @@ background-color: rgba(0, 0, 0, 0);
     white-space:pre-wrap;
     height: auto;
     color: #e1e1e1;
-      font-size:15px; 
+      font-size:15px;
        -moz-column-count: 1;
        -moz-column-gap: 40px;
        -webkit-column-count: 1;
@@ -291,13 +291,13 @@ background-color: rgba(0, 0, 0, 0);
   transform: translateY(-40.0%);
 }
 
-.cd-horizontal-timeline .events-content first 
+.cd-horizontal-timeline .events-content first
 {
     font-size: 100%;
     text-transform:uppercase;
 }
 
-.cd-horizontal-timeline .events-content p:not(.history):not(.destinations):not(.dialogue):not(.excludefirst):not(.continueprompt):first-letter { 
+.cd-horizontal-timeline .events-content p:not(.history):not(.destinations):not(.dialogue):not(.excludefirst):not(.continueprompt):first-letter {
     padding:12px 8px 0px 4px;
     margin-right: 8px;
     line-height: 0.5em;
@@ -360,7 +360,7 @@ background-color: rgba(0, 0, 0, 0);
 }
 .cd-horizontal-timeline .events-content li > * {
 }
-.cd-horizontal-timeline .events-content h1 
+.cd-horizontal-timeline .events-content h1
 {
     width:50%;
   font-size: 1.5em;
@@ -370,8 +370,8 @@ background-color: rgba(0, 0, 0, 0);
   top: 0px; left: 50%; bottom: 0px; right: 0;
 
     text-align: right !important;
-    letter-spacing: 0.4em; 
-    color: #070707;
+    letter-spacing: 0.4em;
+    color: #e2e2e2;
     transform: translateX(-100%) translateX( -100px );
 }
 .cd-horizontal-timeline .events-content h1::before {

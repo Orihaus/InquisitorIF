@@ -1,4 +1,7 @@
 var timelinebegun = false;
+var eventsMinDistance = 4;
+var timelineventlapse = 5;
+
 function trybegintimeline()
 {
     if ( timelinebegun )
@@ -7,8 +10,7 @@ function trybegintimeline()
     }
 
     timelinebegun = true;
-	var timelines = $('.cd-horizontal-timeline'),
-		eventsMinDistance = 1;
+	var timelines = $('.cd-horizontal-timeline');
 
 	( timelines.length > 0 ) && initTimeline( timelines );
 
@@ -16,18 +18,18 @@ function trybegintimeline()
 		timelines.each(function(){
 			var timeline = $(this),
 				timelineComponents = {};
-			//cache timeline components 
+			//cache timeline components
 			timelineComponents['timelineWrapper'] = timeline.find('.events-wrapper');
 			timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
 			timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
 			timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find( 'a' );
 			timelineComponents['timelineDates'] = parseDate(timelineComponents['timelineEvents']);
-			timelineComponents['eventsMinLapse'] = minLapse(timelineComponents['timelineDates']);
+			timelineComponents['eventsMinLapse'] = timelineventlapse;//minLapse(timelineComponents['timelineDates']);
 			timelineComponents['timelineNavigation'] = timeline.find('.cd-timeline-navigation');
 			timelineComponents['eventsContent'] = timeline.children( '.events-content' );
 
-			console.log( timelineComponents['eventsWrapper'].find( '.active' ) );
-			console.log( timelineComponents['eventsWrapper'].find( 'a' ) );
+			//console.log( timelineComponents['eventsWrapper'].find( '.active' ) );
+			//console.log( timelineComponents['eventsWrapper'].find( 'a' ) );
 
 			//assign a left postion to the single events along the timeline
 			setDatePosition(timelineComponents, eventsMinDistance);
@@ -38,7 +40,7 @@ function trybegintimeline()
 
 			$.smoothScroll( {
 			    scrollElement: $( '.content' ),
-			    offset: findcenter( '.selected' ),
+			    offset: inquisitor.findcenter( '.selected' ),
 			} );
 
 			//detect click on the next arrow
@@ -73,7 +75,7 @@ function trybegintimeline()
 
 			//keyboard navigation
 			$(document).keyup(function(event){
-			    if ( event.which == '37' ) //elementInViewport( timeline.get( 0 ) ) 
+			    if ( event.which == '37' ) //elementInViewport( timeline.get( 0 ) )
 			    {
 			        showNewContent( timelineComponents, timelineTotWidth, 'prev' );
 			    }
@@ -89,8 +91,8 @@ function trybegintimeline()
 		//retrieve translateX value of timelineComponents['eventsWrapper']
 		var translateValue = getTranslateValue(timelineComponents['eventsWrapper']),
 			wrapperWidth = Number(timelineComponents['timelineWrapper'].css('width').replace('px', ''));
-		//translate the timeline to the left('next')/right('prev') 
-		(string == 'next') 
+		//translate the timeline to the left('next')/right('prev')
+		(string == 'next')
 			? translateTimeline(timelineComponents, translateValue - wrapperWidth + eventsMinDistance, wrapperWidth - timelineTotWidth)
 			: translateTimeline(timelineComponents, translateValue + wrapperWidth - eventsMinDistance);
 	}
@@ -137,8 +139,8 @@ function trybegintimeline()
 		    }
 		    var newEvent = findingnextactive;
 
-		    console.log( newEvent );
-			
+		    //console.log( newEvent );
+
 			updateFilling(newEvent, timelineComponents['fillingLine'], timelineTotWidth);
 			updateVisibleContent(newEvent, timelineComponents['eventsContent']);
 			newEvent.addClass('selected');
@@ -161,14 +163,14 @@ function trybegintimeline()
         }*/
 
 	    var eventid = event.get( 0 ).id;
-	    //var textbodylocation = findcenter( '#' + eventidcorrected 
-	    console.log( event.attr( "data" ) );
-	    backgroundimageurltimeline = backgroundimageurl = event.attr( "data" );
-	    redrawbackground();
+	    //var textbodylocation = findcenter( '#' + eventidcorrected
+	    //console.log( event.attr( "data" ) );
+	    inquisitor.render.backgroundimageurltimeline = inquisitor.render.backgroundimageurl = event.attr( "data" );
+	    inquisitor.redrawbackground();
 
         $.smoothScroll( {
             scrollElement: $( '.content' ),
-            offset: findcenter( '#' + eventid ),
+            offset: inquisitor.findcenter( '#' + eventid ),
         } );
 	}
 
@@ -199,7 +201,7 @@ function trybegintimeline()
 		    	distanceNorm = Math.round(distance/timelineComponents['eventsMinLapse']) + 2;
 		    timelineComponents['timelineEvents'].eq( i ).css( 'left', distanceNorm * min + 'px' );
 
-		    console.log( timelineComponents['timelineEvents'].eq( i ) );
+		    //console.log( timelineComponents['timelineEvents'].eq( i ) );
 		}
 	}
 
@@ -211,7 +213,7 @@ function trybegintimeline()
 		timelineComponents['eventsWrapper'].css('width', totalWidth+'px');
 		updateFilling(timelineComponents['eventsWrapper'].find('a.selected'), timelineComponents['fillingLine'], totalWidth);
 		updateTimelinePosition('next', timelineComponents['eventsWrapper'].find('a.selected'), timelineComponents);
-	
+
 		return totalWidth;
 	}
 
@@ -298,7 +300,7 @@ function trybegintimeline()
 	function minLapse(dates) {
 		//determine the minimum distance among events
 		var dateDistances = [];
-		for (i = 1; i < dates.length; i++) { 
+		for (i = 1; i < dates.length; i++) {
 		    var distance = daydiff(dates[i-1], dates[i]);
 		    dateDistances.push(distance);
 		}

@@ -1,129 +1,4 @@
-var directiontoint = function ( direction )
-{
-    switch ( direction )
-    {
-        case "North":
-            return 1;
-        case "East":
-            return 2;
-        case "South":
-            return 3;
-        case "West":
-            return 4;
-        case "Up":
-            return 5;
-        case "Down":
-            return 6;
-    }
-
-    return 0;
-}
-
-var intdirectioninvert = function ( int )
-{
-    switch ( int )
-    {
-        case 1:
-            return 3;
-        case 2:
-            return 4;
-        case 3:
-            return 1;
-        case 4:
-            return 2;
-        case 5:
-            return 6;
-        case 6:
-            return 5;
-    }
-
-    return 0;
-}
-
-var inttodirection = function ( int )
-{
-    switch ( int )
-    {
-        case 1:
-            return "North";
-        case 2:
-            return "East";
-        case 3:
-            return "South";
-        case 4:
-            return "West";
-        case 5:
-            return "Up";
-        case 6:
-            return "Down";
-    }
-
-    return "Stationary";
-}
-
-var writelocationinfo = function ( location )
-{
-    location.fullname = "";
-    for ( var index in location.namesegments )
-    {
-        location.fullname += location.namesegments[index] + ( ( index < location.namesegments.length - 1 ) ? " - " : "" );
-    }
-    console.log( "inquisitorParse: Recreated full name: " + location.fullname );
-
-    location.region = location.namesegments[0];
-    location.subregion = location.namesegments[1];
-    location.name = location.namesegments[location.namesegments.length - 1];
-
-    console.log( "inquisitorParse: Found location region: " + location.region );
-    console.log( "inquisitorParse: Found location name: " + location.name );
-
-    return location;
-};
-
-var findparent = function ( result, location )
-{
-    var regionceptiondepth = 0;
-    var parentregionception;
-    var regionception = result.regions;
-    var lastid = -1;
-
-    while ( regionceptiondepth < location.namesegments.length )
-    {
-        if ( regionception.children === null || regionception.children === undefined )
-        {
-            regionception.children = {};
-        }
-
-        if ( !( regionception.children.hasOwnProperty( location.namesegments[regionceptiondepth] ) ) )
-        {
-                regionception.children[location.namesegments[regionceptiondepth]] = {
-                    id: location.id,
-                    firstid: location.id,
-                    isobject: location.isobject,
-                    backgroundimage: location.backgroundimage,
-                    state: location.state,
-                    children: {},
-                    parentid: lastid,
-                    name: location.namesegments[regionceptiondepth]
-                };
-        }
-
-        if ( !regionception.children[location.namesegments[regionceptiondepth]].isobject )
-        {
-            lastid = regionception.children[location.namesegments[regionceptiondepth]].id;
-        }
-
-        parentregionception = regionception;
-        regionception = regionception.children[location.namesegments[regionceptiondepth]];
-        regionceptiondepth++;
-    }
-
-    return parentregionception.id;
-};
-
-//
-
-var inquisitorParse = function ( inputsource, maincallback )
+Inquisitor.prototype.parse = function ( inputsource, maincallback )
 {
     var result =
     {
@@ -132,6 +7,7 @@ var inquisitorParse = function ( inputsource, maincallback )
         rawdialogue: [],
         rawlocations: [],
         entities: [],
+        agents: {},
         linearlocations: [],
 
         referencebuffer: {},
@@ -219,7 +95,7 @@ var inquisitorParse = function ( inputsource, maincallback )
         var whitespace = '', originalposition = at;
 
         previous();
-        previous();
+        //previous();
         while( ch === '\n' || ch === ' ' )
         {
             ch = text.charAt( at );
@@ -228,25 +104,29 @@ var inquisitorParse = function ( inputsource, maincallback )
             at--;
         }
         at = originalposition;
+        ch = text.charAt( at );
 
-        console.log( whitespace );
+        //console.log( whitespace );
 
         return whitespace;
     };
 
     var white = function ()
     {
+        var resultwhite = "";
         while ( ch && ch <= ' ' )
         {
+            resultwhite += ch;
             next();
         }
+        return resultwhite;
     };
 
     var value;  // Place holder for the value function.
 
     var regions = [];
 
-    var processconditional = function ( conditionone, conditiontwo, conditionthree, conditionfour, conditionfive, conditionsix, conditionseven )
+    var processconditional = function ( conditionone, conditiontwo, conditionthree, conditionfour, conditionfive, conditionsix, conditionseven, conditioneight )
     {
         if ( conditiontwo === undefined || conditiontwo === null )
         {
@@ -272,11 +152,15 @@ var inquisitorParse = function ( inputsource, maincallback )
         {
             conditionseven = conditionone;
         }
+        if ( conditioneight === undefined || conditioneight === null )
+        {
+            conditioneight = conditionone;
+        }
 
         var processingindex = 0;
         var processresult = '';
 
-        while ( ch !== conditionone && ch !== conditiontwo && ch !== conditionthree && ch !== conditionfour && ch !== conditionfive && ch !== conditionsix && ch !== conditionseven )
+        while ( ch !== conditionone && ch !== conditiontwo && ch !== conditionthree && ch !== conditionfour && ch !== conditionfive && ch !== conditionsix && ch !== conditionseven && ch !== conditioneight )
         {
             if ( processingindex > 0 )
             {
@@ -371,6 +255,7 @@ var inquisitorParse = function ( inputsource, maincallback )
             location.backgroundimage = '';
             location.hasconcepts = false;
             location.state = 'stateless';
+            location.color = "";
 
             //console.log( "inquisitorParse: Processing " + ( location.isobject ? "Object" : "Location" ) );
 
@@ -383,7 +268,7 @@ var inquisitorParse = function ( inputsource, maincallback )
             else if ( ch === ':' )
             {
                 location.isentity = true;
-                console.log( "inquisitorParse: Found Entity" );
+                //console.log( "inquisitorParse: Found Entity" );
                 next();
             }
 
@@ -440,14 +325,14 @@ var inquisitorParse = function ( inputsource, maincallback )
                 location.namesegments = selectedname;
                 location.namesegments.unshift( conceptparentstaticname );
                 location.namesegments.unshift( "Concepts" );
-                console.log( location.namesegments );
+                //console.log( location.namesegments );
             }
             else
             {
                 location.namesegments = selectedname;
             }
 
-            location = writelocationinfo( location );
+            location = inquisitor.writelocationinfo( location );
 
             var bail = false;
 
@@ -458,19 +343,25 @@ var inquisitorParse = function ( inputsource, maincallback )
                 if ( peeknextidentical( '>' ) )
                 {
                     bail = true;
-                    console.log( "inquisitorParse: Bail" );
+                    //console.log( "inquisitorParse: Bail" );
                 }
                 else if ( peeknext( '>', '?' ) )
                 {
                     next();
                     var state = processconditional( '\n' ).trim();
-                    console.log( "inquisitorParse: Found state: " + state );
+                    //console.log( "inquisitorParse: Found state: " + state );
                     location.state = state;
+                }
+                else if ( peeknext( '>', '#' ) )
+                {
+                    var color = processconditional( '\n' ).trim();
+                    console.log( "inquisitorParse: Found background color: " + color );
+                    location.color = color;
                 }
                 else
                 {
                     var backgroundimage = processconditional( '\n' );
-                    console.log( "inquisitorParse: Found background image: " + backgroundimage );
+                    //console.log( "inquisitorParse: Found background image: " + backgroundimage );
                     location.backgroundimage = backgroundimage;
                 }
             }
@@ -567,25 +458,50 @@ var inquisitorParse = function ( inputsource, maincallback )
                         //console.log( "inquisitorParse: Found location override. Title: " + override.title + ". Target: " + override.target );
                         next();
                     }*/
-                    
+
                     if ( peeknextidentical( '|' ) )
                     {
-                        next(); 
+                        next();
 
-                        console.log( "inquisitorParse: Sceduling NPC conception." );
+                        //console.log( "inquisitorParse: Sceduling NPC conception." );
 
                         location.hasconcepts = true;
 
                         processlocation( true, location.staticname, location.id );
                         next(); next();
 
-                        console.log( "inquisitorParse: Ending NPC conception." );
+                        //console.log( "inquisitorParse: Ending NPC conception." );
+                    }
+                    else if ( ch === '"' )
+                    {
+                        console.log( "inquisitorParse: Reading quote as raw." );
+
+                        //if ( !checkempty( currentdescriptionsegment.trim() ) )
+                        //{
+                        //previous();
+                            //currentdescriptionsegment = grableadingwhitespace();
+                            //var olddescriptionsegment = { text: currentdescriptionsegment, requiresactivation: false, postactivationtext: '', islink: false }
+                            //location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = '';
+                        //}
+
+                        //next();
+                        next();
+
+                        currentdescriptionsegment += '"' + ch + processconditional( '"' );
+
+                        var olddescriptionsegment = { text: currentdescriptionsegment + '"', requiresactivation: false, active: true, postactivationtext: '', islink: false }
+                        location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = "";
+
+                        console.log( "inquisitorParse: Ending quote." );
+
+                        next();
                     }
                     else if ( ch === '{' || ch === '[' )
                     {
-                        var linkidentifier = ch === '{' ? '}' : ']';
+                        var islinklocal = ( ch === '[' );
+                        var linkidentifier = !islinklocal ? '}' : ']';
                         var additionprocessingindex = 0;
-                        var targetaddition = { target: '', title: '', conditional: '', hasconditional: false, exclusionconditional: false, token: '', action: '', displayaschild: false, linkdirection: 0, resetonlink: false }
+                        var targetaddition = { target: '', title: '', transition: '', conditional: '', hasconditional: false, exclusionconditional: false, token: '', action: '', displayaschild: false, linkdirection: 0, resetonlink: false, force: ch === '{', allowmutual: !( ch === '{' ) }
 
                         next();
                         if ( ch === "^" )
@@ -616,7 +532,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                         }
 
                         targetaddition.target += target;//.trim();
-                        targetaddition.title += processconditional( linkidentifier, '?', '+', '!', '@', '/', '<' );//.trim();
+                        targetaddition.title += processconditional( linkidentifier, '?', '+', '!', '@', '/', '<', '(' );//.trim();
 
                         if ( targetaddition.title === '' )
                         {
@@ -673,13 +589,21 @@ var inquisitorParse = function ( inputsource, maincallback )
                             //console.log( "inquisitorParse: Found Action: " + targetaddition.action );
                         }
 
+                        if ( ch === '(' )
+                        {
+                            targetaddition.transition += processconditional( linkidentifier, ')' );
+                            targetaddition.transition = targetaddition.transition.trim();
+                            //console.log( "inquisitorParse: Found Transition: " + targetaddition.transition );
+                            next();
+                        }
+
                         //
 
                         if ( ch === '@' )
                         {
                             var linkdirectionstring = '';
                             linkdirectionstring += processconditional( linkidentifier, '<' );
-                            targetaddition.linkdirection = directiontoint( linkdirectionstring.trim() );
+                            targetaddition.linkdirection = inquisitor.directiontoint( linkdirectionstring.trim() );
                             //console.log( "inquisitorParse: Found Direction: " + targetaddition.linkdirection );
                         }
 
@@ -708,7 +632,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                             location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = '';
                         }
 
-                        console.log( "inquisitorParse: Found active note, processing." );
+                        //console.log( "inquisitorParse: Found active note, processing." );
 
                         var newdescriptionsegment = { text: '', requiresactivation: true, active: false, postactivationtext: '', additional: false, givetoken: '', requiretokens: [], requireinversion: false, timedcondition: -1, timedconditionislocal: false, islink: false }
                         newdescriptionsegment.text += processconditional( ':' );
@@ -726,7 +650,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                         {
                             newdescriptionsegment.givetoken += processconditional( '|', '?', '!' );
                             newdescriptionsegment.givetoken = newdescriptionsegment.givetoken.trim();
-                            console.log( "inquisitorParse: Found Token to Give: " + newdescriptionsegment.givetoken );
+                            //console.log( "inquisitorParse: Found Token to Give: " + newdescriptionsegment.givetoken );
                         }
 
                         if ( ch === '(' )
@@ -750,7 +674,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                                 var requiretoken = ch + processconditional( '|', '?', '!' );
                                 requiretoken = requiretoken.trim();
                                 newdescriptionsegment.requiretokens.push( requiretoken );
-                                console.log( "inquisitorParse: Found Token to Require: " + newdescriptionsegment.requiretokens[newdescriptionsegment.requiretokens.length - 1] );
+                                //console.log( "inquisitorParse: Found Token to Require: " + newdescriptionsegment.requiretokens[newdescriptionsegment.requiretokens.length - 1] );
                             }
 
                             if( ch === '|' )
@@ -814,6 +738,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                     {
                         //
 
+                        previous();
                         if ( ch === '\n' )
                         {
                             if ( !checkempty( currentdescriptionsegment.trim() ) )
@@ -824,6 +749,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                                 location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = '';
                             }
                         }
+                        next();
 
                         if ( descindex > 0 )
                         {
@@ -852,13 +778,13 @@ var inquisitorParse = function ( inputsource, maincallback )
                 var segindex = location.inlinelinks[inlineindex].segmentindex;
                 var descriptionsegmenttoupdate = location.descriptionsegments[segindex];
 
-                console.log( "inquisitorParse: Connecting inline and offline link to destination: " + location.inlinelinks[inlineindex].destination );
+                //console.log( "inquisitorParse: Connecting inline and offline link to destination: " + location.inlinelinks[inlineindex].destination );
 
                 for ( var overrideindex in location.linkoverrides )
                 {
                     if( location.linkoverrides[overrideindex].target === location.inlinelinks[inlineindex].destination )
                     {
-                        console.log( "inquisitorParse: Connected inline and offline link." );
+                        //console.log( "inquisitorParse: Connected inline and offline link." );
                         descriptionsegmenttoupdate.referencedlink = overrideindex;
                         descriptionsegmenttoupdate.referencedlinkisadditional = false;
 
@@ -872,7 +798,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                     {
                         if ( location.linkadditions[overrideindex].target === location.inlinelinks[inlineindex].destination )
                         {
-                            console.log( "inquisitorParse: Connected inline and offline link. (Additional)" );
+                            //console.log( "inquisitorParse: Connected inline and offline link. (Additional)" );
                             descriptionsegmenttoupdate.referencedlink = overrideindex;
                             descriptionsegmenttoupdate.referencedlinkisadditional = true;
 
@@ -883,7 +809,7 @@ var inquisitorParse = function ( inputsource, maincallback )
 
                 if( !foundreference )
                 {
-                    var targetaddition = { target: location.inlinelinks[inlineindex].destination, title: location.inlinelinks[inlineindex].destination, conditional: '', hasconditional: false, exclusionconditional: false, token: '', action: '', displayaschild: false, linkdirection: 0, resetonlink: false }
+                    var targetaddition = { target: location.inlinelinks[inlineindex].destination, title: location.inlinelinks[inlineindex].destination, conditional: '', hasconditional: false, exclusionconditional: false, token: '', action: '', displayaschild: false, linkdirection: 0, resetonlink: false, inlinelinkreference: true, allowmutual: false }
 
                     descriptionsegmenttoupdate.referencedlink = location.inlinelinks[inlineindex].destination;
                     descriptionsegmenttoupdate.referencedlinkisadditional = true;
@@ -900,7 +826,7 @@ var inquisitorParse = function ( inputsource, maincallback )
 
             //
 
-            location.parentid = findparent( result, location ).id;
+            location.parentid = inquisitor.findparent( result, location ).id;
 
             if ( location.isentity )
             {
@@ -938,7 +864,7 @@ var inquisitorParse = function ( inputsource, maincallback )
         event.achievementname = '';
         event.istimelineevent = ( ch === '`' );
 
-        console.log( "inquisitorParse: Processing Event: " + event.id + " in location: " + event.locationid );
+        //console.log( "inquisitorParse: Processing Event: " + event.id + " in location: " + event.locationid );
 
         if ( ch === '#' || ch === '`' )
         {
@@ -965,8 +891,8 @@ var inquisitorParse = function ( inputsource, maincallback )
 
                 next();
 
-                console.log( "inquisitorParse: Found timeline event. Title: " + event.timeline.title + " Display Date: " + event.timeline.displaydate + " Background URL: " + event.timeline.backgroundurl + " Full Date: " );
-                console.log( event.timeline.fulldate );
+                //console.log( "inquisitorParse: Found timeline event. Title: " + event.timeline.title + " Display Date: " + event.timeline.displaydate + " Background URL: " + event.timeline.backgroundurl + " Full Date: " );
+                //console.log( event.timeline.fulldate );
             }
 
             if ( ch === '(' )
@@ -974,7 +900,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                 next();
                 var localtimecondition = ch === '^';
                 var timedcondition = parseInt( processconditional( ')', '+' ).trim() );
-                console.log( "inquisitorParse: Found " + ( localtimecondition ? "Local" : "Global" ) + " Time Conditional: " + timedcondition );
+                //console.log( "inquisitorParse: Found " + ( localtimecondition ? "Local" : "Global" ) + " Time Conditional: " + timedcondition );
 
                 event.timedcondition = timedcondition;
                 event.timedconditionislocal = localtimecondition;
@@ -984,13 +910,13 @@ var inquisitorParse = function ( inputsource, maincallback )
             if ( ch === '[' )
             {
                 var condition = processconditional( ']', '+' ).trim();
-                console.log( "inquisitorParse: Found Event Conditional: " + condition );
+                //console.log( "inquisitorParse: Found Event Conditional: " + condition );
 
                 if ( ch === '+' )
                 {
                     event.givetoken += processconditional( ']' );
                     event.givetoken = event.givetoken.trim();
-                    console.log( "inquisitorParse: Found Token: " + event.givetoken );
+                    //console.log( "inquisitorParse: Found Token: " + event.givetoken );
                 }
 
                 event.condition = condition;
@@ -1001,22 +927,37 @@ var inquisitorParse = function ( inputsource, maincallback )
             {
                 if ( ch === '@' )
                 {
-                    var titletext = processconditional( '\n', '$' );
+                    var quotetitle = processconditional( '\n' );
                     next();
-                    event.text += "<notetitle>" + titletext + "</notetitle>";
+                    event.text += "@@" + quotetitle + "@@";
+                    //console.log( "inquisitorParse: Found event sound: " + event.soundurl );
                 }
                 else if ( ch === '&' )
                 {
                     var soundurl = processconditional( '\n', '$' );
                     next();
                     event.soundurl += soundurl;
-                    console.log( "inquisitorParse: Found event sound: " + event.soundurl );
+                    //console.log( "inquisitorParse: Found event sound: " + event.soundurl );
                 }
                 else if ( ch === '$' )
                 {
                     var achievementstring = processconditional( '\n' ).trim();
                     next();
                     event.achievementname = achievementstring;
+                }
+                else if ( ch === '"' )
+                {
+                    console.log( "inquisitorParse: Reading quote as raw." );
+
+                    next();
+
+                    var currentdescriptionsegment = ch + processconditional( '"' );
+
+                    event.text += '"' + currentdescriptionsegment + '"';
+
+                    console.log( "inquisitorParse: Ending quote." );
+
+                    next();
                 }
                 else
                 {
@@ -1029,10 +970,10 @@ var inquisitorParse = function ( inputsource, maincallback )
             {
                 var olddescriptionsegment = { text: event.text, requiresactivation: false, active: true, postactivationtext: '' }
                 event.descriptionsegments.push( olddescriptionsegment );
-                console.log( "inquisitorParse: Found event description." );
+                //console.log( "inquisitorParse: Found event description." );
             }
 
-            console.log( "inquisitorParse: Found event text: " + event.text );
+            //console.log( "inquisitorParse: Found event text: " + event.text );
 
             result.rawevents.push( event );
             return event;
@@ -1085,14 +1026,14 @@ var inquisitorParse = function ( inputsource, maincallback )
             var soundurl = processconditional( '\n' );
             next();
             dialogue.soundurl += soundurl;
-            console.log( "inquisitorParse: Found dialogue sound: " + dialogue.soundurl );
+            //console.log( "inquisitorParse: Found dialogue sound: " + dialogue.soundurl );
         }
 
         if ( ch === '+' )
         {
             dialogue.givetoken += processconditional( '/', '?', '!' );
             dialogue.givetoken = dialogue.givetoken.trim();
-            console.log( "inquisitorParse: Found Token to Give: " + dialogue.givetoken );
+            //console.log( "inquisitorParse: Found Token to Give: " + dialogue.givetoken );
         }
 
         while ( true )
@@ -1105,7 +1046,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                 requiretoken = requiretoken.trim();
                 dialogue.requiretokens.push( requiretoken );
                 dialogue.requiresactivation = true;
-                console.log( "inquisitorParse: Found Token to Require: " + dialogue.requiretokens[dialogue.requiretokens.length - 1] );
+                //console.log( "inquisitorParse: Found Token to Require: " + dialogue.requiretokens[dialogue.requiretokens.length - 1] );
             }
 
             if ( ch === '$' )
@@ -1126,7 +1067,7 @@ var inquisitorParse = function ( inputsource, maincallback )
 
         //dialogue.text = dialogue.rawtext.split( '\n');
 
-        console.log( "inquisitorParse: Found dialogue text: " + dialogue.rawtext );
+        //console.log( "inquisitorParse: Found dialogue text: " + dialogue.rawtext );
         result.rawdialogue.push( dialogue );
 
         next();
@@ -1138,7 +1079,7 @@ var inquisitorParse = function ( inputsource, maincallback )
     {
         var commenttext = "";
         var isterminated = false;
-        
+
         next();
 
         while ( !isterminated )
@@ -1151,6 +1092,32 @@ var inquisitorParse = function ( inputsource, maincallback )
         next();
 
         return commenttext;
+    }
+
+    var agent = function()
+    {
+        var agentraw = "";
+        var isterminated = false;
+
+        next();
+
+        while ( !peeknextidentical( '^' ) )
+        {
+            agentraw += ch;
+            next();
+        }
+
+        next();
+        next();
+
+        //inquisitor.createagent( agentraw );
+
+        var newagent = new inquisitoragent();
+        newagent.phraseraw( agentraw, Object.keys(result.agents).length );
+
+        result.agents[newagent.name] = newagent;
+
+        return agentraw;
     }
 
     var includebuffer = [];
@@ -1171,7 +1138,7 @@ var inquisitorParse = function ( inputsource, maincallback )
 
     var value = function ()
     {
-        console.log( "inquisitorParse: Finding object to process" );
+        //console.log( "inquisitorParse: Finding object to process" );
 
         switch ( ch )
         {
@@ -1189,7 +1156,17 @@ var inquisitorParse = function ( inputsource, maincallback )
             case '~':
                 return processlocation();
             case '^':
-                return processlocation();
+                {
+                    if ( peeknextidentical( '^' ) )
+                    {
+                        next();
+                        return agent();
+                    }
+                    else
+                    {
+                        return processlocation();
+                    }
+                }
             case ':':
                 return processlocation();
             case '#':
@@ -1215,7 +1192,7 @@ var inquisitorParse = function ( inputsource, maincallback )
         }
     };
 
-    console.log( "inquisitorParse: Began parser." );
+    //console.log( "inquisitorParse: Began parser." );
 
     //
 
@@ -1223,7 +1200,7 @@ var inquisitorParse = function ( inputsource, maincallback )
     {
         at = 0;
         next();
-        console.log( "inquisitorParse: Loaded source. Length: " + text.length + " characters." );
+        //console.log( "inquisitorParse: Loaded source. Length: " + text.length + " characters." );
 
         //
 
@@ -1256,7 +1233,7 @@ var inquisitorParse = function ( inputsource, maincallback )
                 result.rawlocations[concept.conceptparentid].conceptids.push( concept.id );
                 result.rawlocations.push( concept );
 
-                console.log( result.rawlocations[concept.conceptparentid].conceptids );
+                //console.log( result.rawlocations[concept.conceptparentid].conceptids );
             }
 
             //

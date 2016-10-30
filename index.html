@@ -1,10 +1,11 @@
 ﻿<!DOCTYPE html>
-<html> 
+<html>
 <head>
 	<meta charset='UTF-8'>
     <script src='js/include/jquery.min.js'></script>
     <script src='js/include/jquery.smooth-scroll.js'></script>
     <script src='js/include/buzz.js'></script>
+		<script src="js/include/jquery.nicescroll.js"></script>
     <script src='https://code.createjs.com/easeljs-0.8.2.min.js'></script>
 
     <script>
@@ -37,20 +38,26 @@
     </div>
         */
     </script>
-
     <link rel='stylesheet' type='text/css' href='css/style.reset.css' />
     <link rel='stylesheet' type='text/css' href='css/font.library.css' />
     <link rel='stylesheet' type='text/css' href='css/font/crimson/stylesheet.css' />
     <link rel='stylesheet' type='text/css' href='css/font.library.silver.css' />
-    <link rel='stylesheet'           type='text/css'                 href='css/style.silver.css' />
+    <link rel='stylesheet' type='text/css' href='css/style.silver.css' />
     <link rel='stylesheet' type='text/css' href='css/style.timeline.css' />
-    <script                                                          src='js/inquisitorParse.js'></script>
-    <script src='js/inquisitorMain.js'></script>
-    <script src='js/sigil.js'></script>
-	<script 														 src='js/jquery.main.js'></script>
-    <script src='js/timeline.js'></script>
+
+    <script src='js/inquisitorAgent.js'>      </script>
+    <script src='js/inquisitorMain.js'>       </script>
+    <script src='js/inquisitorPersistant.js'> </script>
+    <script src='js/inquisitorParse.js'>      </script>
+    <script src='js/inquisitorLogic.js'>      </script>
+    <script src='js/inquisitorRender.js'>     </script>
+		<script src='js/inquisitorInteraction.js'></script>
+    <script src='js/sigil.js'>                </script>
+	  <script src='js/bootstrap.js'>            </script>
+    <script src='js/timeline.js'>             </script>
 	<title></title>
 </head>
+
 <body onload="forceRefresh();">
     <div id="backgroundprimary" class="background"></div>
     <div id="backgroundsecondary" class="background"></div>
@@ -58,6 +65,12 @@
     <div id="backgroundbordercontainer"></div>
     <span id="exitprompt" class="prompt"></span>
     <span id="clearprompt" class="prompt"></span>
+		<div class='iconbox'>
+			<p id="muteicon" class="icon">s</p>
+			<p id="twittericon" class="icon">T</p>
+			<p id="facebookicon" class="icon">F</p>
+			<p id="instagramicon" class="icon">I</p>
+		</div>
     <div class="content">
         <section class="cd-horizontal-timeline" id="timeline">
             <div class="timelinemaster">
@@ -76,26 +89,27 @@
             <div class="events-content" id="events-content">
             </div> <!-- .events-content -->
 </section>
+<div id="main">
+		<p id="transitiontext"></p>
         <div id="core">
             <div id="div4">
-                <div class='headerbox'><h4 id='superlocation'></h4><h1 id='location'></h1><div id='sectionholder'>
-                    </div></div>
-                <hr class="style-eight">
-                <p id='dialoguefader1' class='dialoguefader'></p>
-                <p id='dialogue' class='dialogue'></p>
-                <p id='dialoguefader2' class='dialoguefader'></p>
-                <div id='eventmaster'><p id='event'></p></div>
-                <p id='note'><div id='noteline'></div></p>
-                <p id='notenew' class="excludefirst" />
-                <p id='notecontinue' class="continueprompt"></p>
-                <p id='objects' class='destinations'></p>
-                <p id='vessels' class='destinations'></p>
-                <hr id='endofnote' class="style-two">
+	              <hr class="style-eight">
+								<div id='notebox' class='notebox'>
+									<div class='headerbox'><h4 id='superlocation'></h4><h1 id='location'></h1></div>
+	                <p id='note'><div id='noteline'></div></p>
+	                <p id='notecontinue' class="continueprompt"></p>
+									<div id='sectionholder'><div id='sectionholderrotator'></div></div>
+	                <p id='notenew' class="excludefirst" />
                 </div>
+								<p id='objects' class='destinations'></p>
+								<p id='vessels' class='destinations'></p>
+								<hr id='endofnote' class="style-two">
+						</div>
+					  <p id='finalfader1' class="finalfader">
             <div id='diamondcontainer'>
                 <div id="diamond" class='diamond'>
-                    <span class="diamondradial"></span>
-                    <span class="diamondradial circle"></span>
+                    <span class="diamondradial" id="diamondbackgroundone" ></span>
+                    <span class="diamondradial circle" id="diamondbackgroundtwo"></span>
                     <span class="diamondradial diamondline" style="transform: rotate(-10deg );"></span>
                     <span class="diamondradial diamondline" style="transform: rotate(-20deg );"></span>
                     <span class="diamondradial diamondline" style="transform: rotate(-30deg );"></span>
@@ -126,5 +140,6 @@
                 </div>
                 <canvas id="forceRefresh" width="1" height="1"></canvas>
             </div>
+					</div>
 </body>
 </html>
