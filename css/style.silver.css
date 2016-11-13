@@ -585,13 +585,18 @@ hr.diamondstyle
 
 #transitiontext
 {
-  margin: 25% auto; position: relative;
+  left: 150px; top: 48%;
+  margin: 0px auto; position: fixed;
+  display: table;
+  max-width: 1500px;
   text-align: center;
+  letter-spacing: 100px;
+  text-transform: uppercase;
   clear: both;
-  height:200px;
-      pointer-events:none;
-      font-family: 'Cardo', serif;
-      font-size: 150px;
+  pointer-events:none;
+  font-family: 'Bonveno', serif;
+  font-size: 45px;
+  color: #eaeaea;
 }
 
 #note.linearlayout
@@ -1249,23 +1254,22 @@ vessel.visited
 inlinelink
 {
         /*color:#ccb68b !important; */
+        display: inline !important;
         cursor:pointer;
     border: none;
-    font-family: 'Cinzel', sans-serif;
-    font-size: 0.9em;
+    font-family: 'Cardo', serif;
+    font-size: 1.0em;
     text-transform: uppercase;
     font-weight:400;
-    text-align: right;
-    float: right !important;
+    text-align: left;
     pointer-events: all;
-    margin-left: 0px;
-    padding-right: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 0px;
+    padding-bottom: 0px;
     width:auto;
-     text-align: right;
-     letter-spacing: 2px;
-        border-right: 1px solid rgba(255,255,255,0.125);
+     letter-spacing: 0.11em;
+        /*border-bottom: 1px solid rgba(255,255,255,0.125);*/
 }
 inlinelink:hover
 {

@@ -589,6 +589,15 @@ Inquisitor.prototype.updatedescription = function( additionalsegment )
     return descsegments;
 }
 
+jQuery.fn.center = function () {
+    this.css("position","absolute");
+    this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) +
+                                                $(window).scrollTop()) + "px");
+    this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) +
+                                                $(window).scrollLeft()) + "px");
+    return this;
+}
+
 Inquisitor.prototype.findcenter = function( element )
 {
     var el = $( element );
@@ -861,7 +870,7 @@ Inquisitor.prototype.displayvessels = function()
                 referencetitle = inquisitor.findpreviousreferencetitle( referenceid );
             }
 
-            if ( allow )
+            if ( allow && references[index].allowmutual )
             {
                 inquisitor.addvessel( referenceid, referencetitle, true );
                 vesselsadded[referenceid] = ( { index: referenceid, priority: !( referencename === referencetitle ) } );

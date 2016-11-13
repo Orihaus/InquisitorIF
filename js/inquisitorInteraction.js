@@ -231,15 +231,26 @@ Inquisitor.prototype.initializeInteraction = function()
             {
               //console.log( "inquisitor: Performing transition: " + transition );
 
-              $( "#core" ).fadeOut( 2000, function ()
+              $( '#' + inquisitor.render.currentbackgroundbuffer ).fadeOut( 3250,  function ()
+              {
+                $( '#' + inquisitor.render.currentbackgroundbuffer ).fadeIn( 4000 );
+              } );
+
+              $( "#core" ).fadeOut( 1500, function ()
               {
                 $( "#transitiontext" ).html( transition );
+                $.smoothScroll( {
+                    scrollElement: $( '.content' ),
+                    speed: 600,
+                    easing: 'swing',
+                    offset: inquisitor.findcenter( '#transitiontext' )
+                } );
                 $( "#transitiontext" ).hide();
-                $( "#transitiontext" ).fadeIn( 2000, function ()
+                $( "#transitiontext" ).fadeIn( 1750, function ()
                 {
-                  $( "#transitiontext" ).fadeOut( 2000, function ()
+                  $( "#transitiontext" ).fadeOut( 3000, function ()
                   {
-                    $( "#core" ).fadeOut( 2000, function ()
+                    $( "#core" ).fadeOut( 2500, function ()
                     {
                         redraw();
                     } );

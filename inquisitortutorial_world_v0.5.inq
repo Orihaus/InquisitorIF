@@ -1,7 +1,7 @@
 ~Introduction - Tutorial
 >?linearinterface
 >silver/silver_fall_05_ALTALT.png
-An engine for multiplatform Interactive Fiction works, Inquisitor is an Interactive Fiction engine built for use in both a browser-based and standalone form, built around putting spaces at the core of a hypertext work. A combination of Twine and Aliceffekt's Paradise if you will, designed to expand on the strengths of both as well as provide a pleasant reading experience.
+An engine for multiplatform Interactive Fiction works, Inquisitor is built for use in both browser-based and standalone form. Designed around putting spaces at the core of a hypertext work, it's a combination of Twine and Aliceffekt's Paradise if you will, made to expand on the strengths of both as well as provide a pleasant reading experience.
 
 ~Inquisitor - Navigation - Basics
 >?world
@@ -26,17 +26,14 @@ Has created another district with its own hub, that (by default) will automatica
 
 "[Piazza della Repubblica: Take the bus to the Piazza della Repubblica@North]"
 
+Would you like to learn about inline links? <Click here.|Inline Links>
+
 [Basics:Back to the basics@West]
 [Conditionals:Learn how to create conditional links@East]
 [Put It All Together:How to begin writing@South]
 
-//
-<Click here to learn about inline links|Inline Links>
 ~Inquisitor - Navigation - Inline Links
-Inline links allow you to place links to other locations inside your description text. This is ideal for traditional twine like functionality.
-
-<Return to Links|Links>
-//
+Inline links allow you to place links to other locations inside your description text. This is ideal for traditional twine like functionality. <Return to Links.|Links> As you can see, these can be embedded in a standard block of text.
 
 ~Inquisitor - Navigation - Conditionals
 Links are always two way, but it is possible to add conditions on entry.
@@ -56,7 +53,7 @@ See the short description under each location link? You can define these by addi
 "[Fountain of the Naiads:Approach the Piazza's central fountain]"
 
 ~Inquisitor - Navigation - Put It All Together
-You can write this scripting in any text editor you like, just save the result as a plain-text *.inq* and change the first line of "bootstrap.inq" to point to it. That's all.
+You can write this scripting in any text editor you like, just save the result as a plain-text *.inq* and change the first line of "bootstrap.inq" to point to it. If you want to run Inquisitor locally, you'll need to disable restrictions on local file access in your browser. In Chrome this can be done by specifiying '--allow-file-access-from-files' as a startup parameter. Alternatively, you could use Node.js as your platform by simply dragging the Inquisitor folder onto your Node.js executable.
 
 Everything a player does is automatically saved to disk on move including location, settings and all the tokens they have acquired. This can be reset at any time by holding *C*.
 
@@ -159,8 +156,7 @@ You can access the timeline at any time by hitting "Tab".
 
 `What is the Timeline?|May 21st, 2002|21/05/2002|silver/viaroma-11_cleaned.png
 "Quisque elit odio, suscipit quis erat non, vehicula fermentum nunc. Curabitur laoreet dapibus leo, sit amet laoreet mi sodales sed. Aliquam et augue ultricies, pellentesque dolor sit amet, mollis lectus. Sed sed elementum ligula. Nam nec sodales mauris."
-@-Cena, John (2016). "A quote example".
-
+@-Cena, John (2016). "A quote example".@@
 The timeline system is useful for providing an appendix of sorts for more historically oriented works. You can navigate using the left and right arrow keys.
 
 `Timeline Events?|December 1st, ????|1/12/2006|silver/viaroma-11_cleaned.png

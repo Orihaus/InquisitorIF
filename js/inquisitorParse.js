@@ -545,7 +545,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                         {
                             result.referencebuffer[targetaddition.target] = [];
                         }
-                        result.referencebuffer[targetaddition.target].push( { index: location.id, linktitle: location.name } );
+                        result.referencebuffer[targetaddition.target].push( { index: location.id, linktitle: location.name, allowmutual: targetaddition.allowmutual } );
                         //console.log( "inquisitorParse: Adding title to reference buffer: " + targetaddition.title + ". Reference count now: " + result.referencebuffer[targetaddition.title].length );
 
                         //
@@ -929,7 +929,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                 {
                     var quotetitle = processconditional( '\n' );
                     next();
-                    event.text += "@@" + quotetitle + "@@";
+                    event.text += "@@" + quotetitle + "";
                     //console.log( "inquisitorParse: Found event sound: " + event.soundurl );
                 }
                 else if ( ch === '&' )
