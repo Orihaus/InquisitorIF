@@ -57,7 +57,7 @@ Inquisitor.prototype.processdrawntextsegment = function( type, iscurrent, differ
         var finaltextsegment = "<" + type + " class='" + segmentclass + "'" + brightness + "index='" + trueindex + "' id='" + trueindex + "'>"
             + inquisitor.processdescriptiontext( text, !isfirstindex || removefirst, iscurrent && !alliscurrent ) + "</" + type + ">";
 
-        console.log( finaltextsegment );
+        //console.log( finaltextsegment );
         return finaltextsegment;
     }
     else
@@ -272,7 +272,7 @@ Inquisitor.prototype.redrawbackground = function()
     {
       var processedcolor = inquisitor.hexToRgb( inquisitor.render.color );
 
-      console.log( "inquisitorRender: color: " + inquisitor.render.color );
+      //console.log( "inquisitorRender: color: " + inquisitor.render.color );
 
       var highopacitycolor = "rgba("+processedcolor.r+", "+processedcolor.g+", "+processedcolor.b+", "+1.0+")";
       var midopacitycolor  = "rgba("+processedcolor.r+", "+processedcolor.g+", "+processedcolor.b+", "+0.325+")";
@@ -412,7 +412,7 @@ Inquisitor.prototype.processBodyText = function( inputdescriptionsegments, iseve
                   {
                       if ( !persistentworld.activations[persistentworld.store.currentWorldLocationID + ":" + index] )
                       {
-                          rawtext += processdrawntextsegment( "activenote", iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, currentdescriptionsegment[index].text, index, currentprogress, alliscurrent );
+                          rawtext += inquisitor.processdrawntextsegment( "activenote", iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, currentdescriptionsegment[index].text, index, currentprogress, alliscurrent );
                       }
                       else
                       {
@@ -423,7 +423,7 @@ Inquisitor.prototype.processBodyText = function( inputdescriptionsegments, iseve
                           }
                           inactiveactivenotetext += currentdescriptionsegment[index].postactivationtext;
 
-                          rawtext += processdrawntextsegment( "activenoteinactive", iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, inactiveactivenotetext, index, currentprogress, alliscurrent );
+                          rawtext += inquisitor.processdrawntextsegment( "activenoteinactive", iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, inactiveactivenotetext, index, currentprogress, alliscurrent );
                       }
                   }
               }
@@ -490,7 +490,7 @@ Inquisitor.prototype.processBodyText = function( inputdescriptionsegments, iseve
 
                   if ( linkfailed )
                   {
-                      console.log( currentdescriptionsegment[index].text );
+                      //console.log( currentdescriptionsegment[index].text );
                       rawtext += inquisitor.processdrawntextsegment( "inactivenote", iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, currentdescriptionsegment[index].text, index, currentprogress, segmentclass, currentdescriptionsegment[index].force, alliscurrent );
                   }
               }
@@ -504,7 +504,7 @@ Inquisitor.prototype.processBodyText = function( inputdescriptionsegments, iseve
 
     //
 
-    console.log( rawtext );
+    //console.log( rawtext );
 
     return rawtext;
 }

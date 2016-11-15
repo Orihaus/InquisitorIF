@@ -94,6 +94,7 @@ Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocation
     return result;
 }
 
+
 Inquisitor.prototype.testactivationrequirements = function( index, currentdescriptionsegment )
 {
     var allow = false;
@@ -117,8 +118,79 @@ Inquisitor.prototype.testactivationrequirements = function( index, currentdescri
     return allow;
 }
 
+Inquisitor.prototype.updatedirector = function()
+{
+  var rules = inquisitor.world.rulebuffer;
+  //console.log( rules );
+
+  for ( var index in rules )
+  {
+      if( persistentworld.rulestriggered[index] )
+      {
+        continue;
+      }
+
+      var firstvalue, secondvalue = -1;
+      if( parseInt( rules[index].conditionfirstvalue ) >= 0 )
+      {
+        firstvalue = parseInt( rules[index].conditionfirstvalue );
+      }
+      else
+      {
+        firstvalue = persistentworld.tokens[rules[index].conditionfirstvalue];
+      }
+
+      if( parseInt( rules[index].conditionsecondvalue ) >= 0 )
+      {
+        secondvalue = parseInt( rules[index].conditionsecondvalue );
+      }
+      else
+      {
+        secondvalue = persistentworld.tokens[rules[index].conditionsecondvalue];
+      }
+
+      //
+
+      var conditionsuccess = false;
+      switch( rules[index].conditiontype )
+      {
+        case '>':
+          conditionsuccess = firstvalue > secondvalue;
+          break;
+        case '<':
+          conditionsuccess = firstvalue < secondvalue;
+          break;
+        case '=':
+          conditionsuccess = firstvalue == secondvalue;
+          break;
+        default:
+      }
+
+      if( conditionsuccess )
+      {
+        if( rules[index].effecttype === 'travel' )
+        {
+          inquisitor.logic.lastlastWorldLocationID = inquisitor.logic.lastWorldLocationID;
+          persistentworld.store.lastWorldLocationID = persistentworld.store.currentWorldLocationID;
+          persistentworld.store.currentWorldLocationID = inquisitor.findlocationbytitle( rules[index].effectparameter );
+
+          persistentworld.rulestriggered[index] = true;
+        }
+      }
+
+      console.log( "inquisitorLogic: conditionfirstvalue: " + firstvalue + ", conditionsecondvalue: " + secondvalue + ", success: " + conditionsuccess );
+  }
+}
+
 Inquisitor.prototype.updatetime = function( forcetraverse )
 {
+    persistentworld.tokens["_progress"] = persistentworld.lys.vialcount;
+    persistentworld.tokens["_random"]   = Math.floor( Math.random() * 100 );
+
+    inquisitor.updatedirector();
+
+    //
+
     inquisitor.logic.currentlocationprogress = persistentworld.world.locationvisited[persistentworld.store.currentWorldLocationID]
             ? inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length - 1
             : inquisitor.logic.currentlocationprogress;
@@ -145,6 +217,8 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
     }
 
     //
+
+    inquisitor.drawicons();
 
     var traverseoncompletion = false;
 

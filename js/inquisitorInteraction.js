@@ -319,26 +319,47 @@ Inquisitor.prototype.initializeInteraction = function()
             redraw();
         }
 
-        var newtext = processBodyText( inquisitor.getlocation(persistentworld.store.currentWorldLocationID).descriptionsegments );
+        var newtext = inquisitor.processBodyText( inquisitor.getlocation(persistentworld.store.currentWorldLocationID).descriptionsegments );
         $( "#note" ).html( newtext );
     } );
 }
 
+Inquisitor.prototype.drawicons = function()
+{
+  var icons = inquisitor.world.iconbuffer;
+  var iconhtml = '<p id="muteicon" class="icon fonticon">s</p>';//'<p id="twittericon" class="icon fonticon">T</p><p id="facebookicon" class="icon fonticon">F</p><p id="instagramicon" class="icon fonticon">I</p>';
+
+  for ( var index in icons )
+  {
+    console.log(persistentworld.tokens[icons[index].condition]);
+    if( persistentworld.tokens[icons[index].condition] !== undefined && persistentworld.tokens[icons[index].condition] !== null )
+    {
+      iconhtml += '<img id="icon_' + icons[index].condition + '" class="icon" src="' + icons[index].url + '"/>'
+
+      console.log( "inquisitorInteraction: condition: " + icons[index].condition + ", url: " + icons[index].url );
+    }
+  }
+
+  console.log( iconhtml );
+
+  $( "#iconboxmain" ).html( iconhtml );
+}
+
 Inquisitor.prototype.begindisplay = function()
 {
+    var currentlocation = inquisitor.getlocation( persistentworld.store.currentWorldLocationID );
+    //console.log( currentlocation );
+    if ( currentlocation.state !== persistentworld.world.state )
+    {
+      persistentworld.world.state = currentlocation.state.trim();
+      //console.log( 'inquisitor: state set to: ' + persistentworld.world.state );
+    }
+
     clear();
 
     //
 
     inquisitor.updatetime();
-
-    var currentlocation = inquisitor.getlocation( persistentworld.store.currentWorldLocationID );
-    //console.log( currentlocation );
-    if ( currentlocation.state !== persistentworld.world.state )
-    {
-        persistentworld.world.state = currentlocation.state.trim();
-        //console.log( 'inquisitor: state set to: ' + persistentworld.world.state );
-    }
 
     //
 
@@ -448,13 +469,7 @@ Inquisitor.prototype.begindisplay = function()
 
     //
 
-    localStorage.setItem( "activations", JSON.stringify( persistentworld.activations ) );
-    localStorage.setItem( "tokens", JSON.stringify( persistentworld.tokens ) );
-    localStorage.setItem( "store", JSON.stringify( persistentworld.store ) );
-    localStorage.setItem( "time", JSON.stringify( persistentworld.time ) );
-    localStorage.setItem( "entity", JSON.stringify( persistentworld.entity ) );
-    localStorage.setItem( "lys", JSON.stringify( persistentworld.lys ) );
-    localStorage.setItem( "world", JSON.stringify( persistentworld.world ) );
+    inquisitor.savepersistent();
 
     //
 

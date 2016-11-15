@@ -148,6 +148,9 @@ function clear()
     //console.log( "inquisitor: Center: " + center );
     //$( "#div4" ).css( { "top": center } );
 
+    $( "#diamond" ).hide();
+    $( ".diamondradial" ).hide();
+
     $( "#North" ).html( "" );
     $( "#South" ).html( "" );
     $( "#East" ).html( "" );

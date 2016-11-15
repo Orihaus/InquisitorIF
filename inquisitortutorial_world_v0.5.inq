@@ -1,3 +1,6 @@
+>?inquisitortutorial2.0
+>/img/item/TBIM_ITEM_Lantern_512.png?IconExampleToken
+
 ~Introduction - Tutorial
 >?linearinterface
 >silver/silver_fall_05_ALTALT.png
@@ -65,6 +68,12 @@ Everything a player does is automatically saved to disk on move including locati
 There are currently two main affects you can apply to your description text, "quotations" and *emphasis*, written using standard quotation marks and asterixes respectively.
 
 [Background and Color:How to setup location visuals@North]
+[Icons:How to setup inventory icons@West]
+
+~Inquisitor - Design and Typography - Icons
+Once defined, icons indicate a token's status. This can be used as a sort of inventory, or to display warnings or other status effects. Icon definitions are global, and are specified on their own line outside a location definition. Here's the syntax: ">/URL?TOKEN".
+
+|Give an example token?:-You have been given a token set to trigger an icon.+IconExampleToken!IconExampleToken|
 
 ~Inquisitor - Design and Typography - Background and Color
 >#ff0000
@@ -105,18 +114,6 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam maximus cursus o
 
 -
 
-Donec tortor mauris, sollicitudin vel elementum a, elementum hendrerit massa. Aliquam euismod dui aliquet quam vulputate mollis. Phasellus vitae molestie tellus. Nunc suscipit non sapien eget lobortis. Etiam accumsan mauris at tortor tincidunt, non blandit sem dapibus. Aenean molestie nisi eget pulvinar posuere. Etiam sodales, nisi quis faucibus posuere, nisl mi imperdiet dolor, id ultrices massa diam at magna. Mauris tempus ipsum ut sem consectetur commodo. Phasellus fermentum, erat nec gravida imperdiet, nulla nibh luctus odio, ac imperdiet mi dolor id risus. Nam ultricies malesuada massa eget placerat. Curabitur placerat et ligula ut eleifend.
-
--
-
-Curabitur porttitor accumsan leo fringilla varius. Donec venenatis luctus ligula eget ullamcorper. In lobortis tristique diam eget efficitur. Etiam vel lectus dui. Quisque nunc ex, vehicula vel luctus vitae, bibendum at erat. Etiam ullamcorper, velit vitae gravida vulputate, eros lectus lobortis ipsum, non pharetra orci nibh eget est. Integer rutrum sapien non velit vulputate, vel tempor purus dapibus.
-
--
-
-Curabitur ut suscipit urna, nec venenatis lectus. Maecenas hendrerit facilisis ex sit amet ullamcorper. Integer aliquet metus ut turpis lacinia, vitae posuere ligula fringilla. Sed fermentum tortor ut quam ornare mattis. Praesent lobortis venenatis ligula. Cras egestas semper ultricies. Donec dapibus volutpat nibh, vitae egestas sapien auctor at. Suspendisse maximus iaculis dui eu pharetra. Integer consequat dui sed nibh tempus dictum. Nullam vulputate nunc bibendum luctus consectetur. Sed sit amet nisi eu velit congue tristique. Nunc ut porttitor tellus. Duis ac tortor nec enim auctor blandit quis sit amet quam. Sed ac congue leo. Maecenas lorem lorem, porta id magna vitae, blandit ornare ligula. Aenean mattis diam vel placerat dictum.
-
--
-
 Mauris at lobortis neque, ut mattis turpis. Sed dignissim nulla id nisl ultrices elementum. Mauris dui mi, venenatis non mollis mollis, cursus a turpis. Suspendisse potenti. Nam porttitor, mi vitae fermentum tempus, lacus urna commodo quam, sit amet mattis justo elit vitae enim. Nullam a efficitur dolor, ut maximus arcu. Phasellus tempor, risus viverra dictum cursus, nunc lorem molestie dui, ac suscipit ipsum ex non lacus. Nam eu enim at orci consectetur egestas. Nullam vel elit rutrum velit molestie fermentum eu vitae elit. Quisque imperdiet sem ut turpis bibendum, at varius nibh interdum. Suspendisse dignissim vehicula tellus ac imperdiet. Aenean quis purus id mauris laoreet bibendum vitae suscipit velit. Cras cursus aliquam facilisis. Vestibulum a convallis ligula. Sed blandit a lectus et finibus.
 
 -
@@ -127,18 +124,18 @@ Proin sed condimentum tortor, placerat aliquet lorem. Aliquam erat volutpat. Fus
 
 Donec finibus eget purus a placerat. Ut a accumsan quam. Fusce sapien turpis, feugiat in justo id, facilisis elementum tortor. Maecenas vel ante euismod, porttitor nunc at, vehicula justo. Proin ut ultricies sapien. Etiam sollicitudin hendrerit turpis id fringilla. Integer volutpat nisl ut sem aliquam, sed ullamcorper turpis efficitur. Etiam nec orci ullamcorper, rhoncus dui ac, tempor lorem. Etiam eros lacus, iaculis ut orci ut, dapibus volutpat nulla. Praesent lobortis enim eros, id hendrerit augue tincidunt venenatis. Praesent gravida eu dolor quis volutpat.
 
--
-
-Nam ut lorem sit amet purus elementum finibus sed ornare ligula. Quisque aliquet dolor augue, id pulvinar massa finibus vitae. Morbi sit amet odio nisl. Duis id feugiat erat, nec rhoncus lacus. Fusce vestibulum sollicitudin tincidunt. Praesent dignissim quam velit, in tempus diam varius vitae. Nullam rhoncus, magna quis finibus faucibus, diam mi ornare ipsum, sed ultrices enim libero quis est. Ut ullamcorper dignissim iaculis. Morbi ultrices venenatis felis, nec accumsan quam ultricies a. Suspendisse metus erat, sodales et mi a, bibendum fringilla metus.
-
--
-
-Integer venenatis bibendum facilisis. Ut pulvinar ultrices velit, vitae efficitur lectus volutpat quis. In hac habitasse platea dictumst. Vivamus pulvinar rhoncus nulla, non dictum sapien vulputate vitae. Sed efficitur quam id scelerisque porttitor. Praesent imperdiet rhoncus ligula sit amet volutpat. Nam tempus velit sit amet enim blandit dignissim. Pellentesque scelerisque cursus tincidunt. Donec eget ipsum rutrum, ultrices nisi non, efficitur purus. Nunc a nunc ut sapien eleifend eleifend vitae vitae ligula. Maecenas mauris lorem, imperdiet sed metus ut, dictum finibus massa. Quisque elit odio, suscipit quis erat non, vehicula fermentum nunc. Curabitur laoreet dapibus leo, sit amet laoreet mi sodales sed. Aliquam et augue ultricies, pellentesque dolor sit amet, mollis lectus. Sed sed elementum ligula. Nam nec sodales mauris.
-
 ~Inquisitor - Advanced and Experimental
 All this stuff is work in progress and is liable to change.
 
 [Timeline:Access the Timeline@East]
+
+>|_progress>0:travel.Director|
+~Inquisitor - Advanced and Experimental - Director
+You have been taken here due to the global director triggering a rule. Director rules read player actions to perform basic operations based on them, in this case teleporting you here. They are formatted thus: ">|FIRSTVALUE>SECONDVALUE:OPERATION.PARAMETER|". 
+
+The inputs to the conditions can be either tokens or global values. Currently the only avaiable operation is 'travel', which will teleport the player to the specified location on trigger. This is the rule definition used to take you here: ">|_progress>0:travel.Director|"
+
+<Click here to return.|Advanced and Experimental>
 
 ^:Inquisitor - Advanced and Experimental - Maeve
 Maeve is an NPC defined with the same identifier as a standard object ("^"), only now followed by an additional ":" to specify this object as one that will wander the world of its own accord.

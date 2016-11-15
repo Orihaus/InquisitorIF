@@ -2,6 +2,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 {
     var result =
     {
+        title: "untitled",
         regions: {},
         rawevents: [],
         rawdialogue: [],
@@ -10,6 +11,8 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
         agents: {},
         linearlocations: [],
 
+        rulebuffer: [],
+        iconbuffer: [],
         referencebuffer: {},
         entitydefinitionbuffer: [],
         conceptdefinitionbuffer: [],
@@ -626,11 +629,11 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                         //
 
-                        if ( !checkempty( currentdescriptionsegment.trim() ) )
-                        {
+                        //if ( !checkempty( currentdescriptionsegment.trim() ) )
+                        //{
                             var olddescriptionsegment = { text: currentdescriptionsegment, requiresactivation: false, postactivationtext: '', islink: false }
                             location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = '';
-                        }
+                        //}
 
                         //console.log( "inquisitorParse: Found active note, processing." );
 
@@ -1136,6 +1139,67 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
         return includeurl;
     }
 
+    // >|_progress>5:travel.moon|
+    var processdirectorrule = function ()
+    {
+        var rule =
+        {
+          conditionfirstvalue:  "0",
+          conditionsecondvalue: "0",
+          conditiontype:        ">",
+          effecttype:           "travel",
+          effectparameter:      "",
+          triggered: false
+        }
+
+        next();
+
+        rule.conditionfirstvalue  = ch + processconditional( ">", "<", "=" );
+        rule.conditiontype        = ch;
+        rule.conditionsecondvalue = processconditional( ":" );
+
+        rule.effecttype      = processconditional( "." );
+        rule.effectparameter = processconditional( "\n", "|" );
+
+        console.log( "inquisitorParse: rule found:" );
+        console.log( rule );
+
+        result.rulebuffer.push( rule );
+
+        return rule;
+    }
+
+    // >/img/ui/TBIM_UI_Credits_256.png?_random
+    var processicon = function ()
+    {
+        var icon =
+        {
+          condition: "",
+          url: ""
+        }
+
+        next();
+
+        icon.url = ch + processconditional( "?" );
+        icon.condition = processconditional( "\n" ).trim();
+
+        console.log( "inquisitorParse: icon found:" );
+        console.log( icon );
+
+        result.iconbuffer.push( icon );
+
+        return icon;
+    }
+
+    // >?toburninmemory2.0
+    var processtitle = function ()
+    {
+        next();
+        result.title = ch + processconditional( "\n" ).trim();
+
+        return result.title;
+    }
+
     var value = function ()
     {
         //console.log( "inquisitorParse: Finding object to process" );
@@ -1179,6 +1243,21 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                     {
                         next();
                         return include();
+                    }
+                    if ( peeknext( '>', '|' ) )
+                    {
+                        next();
+                        return processdirectorrule();
+                    }
+                    if ( peeknext( '>', '/' ) )
+                    {
+                        next();
+                        return processicon();
+                    }
+                    if ( peeknext( '>', '?' ) )
+                    {
+                        next();
+                        return processtitle();
                     }
                     else
                     {

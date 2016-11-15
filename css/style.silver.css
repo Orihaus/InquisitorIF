@@ -30,38 +30,40 @@ body
 {
   position: fixed;
   margin-top: 50px;
-  left:50px;
+  left:28px;
   height:25px;
   transform: rotate(-90deg);
 }
 
 #muteicon
 {
-  font-size: 22px;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
 }
 
 .icon
 {
+  display: block;
   text-align:center;
-  font-family: 'Fabrica', serif;
-  font-size: 16px;
   letter-spacing: 15px;
   color:#e1e1e1;
   font-weight:100;
   text-transform: none;
   transform: rotate(90deg) translateZ(0) scale(1.0, 1.0);
-  opacity: 0.2;
+  opacity: 0.5;
   -webkit-backface-visibility: hidden;
   filter: blur(0);
   -webkit-filter: blur(0);
 
-  image-rendering: optimizeSpeed;             /*                     */
-  image-rendering: -moz-crisp-edges;          /* Firefox             */
-  image-rendering: -o-crisp-edges;            /* Opera               */
-  image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
-  image-rendering: optimize-contrast;         /* CSS3 Proposed       */
-  -ms-interpolation-mode: nearest-neighbor;   /* IE8+                */
+    width: 48px; height: 48px;
+    pointer-events: all !important;
+}
+
+.fonticon
+{
+  font-family: 'Fabrica', serif;
+  font-size: 24px;
+  padding-left: 12px;
+  padding-top: 6px;
 }
 .icon:hover
 {
@@ -336,6 +338,7 @@ hr.diamondstyle
 
     opacity: 0.75;
     -webkit-backface-visibility: hidden;
+    pointer-events: none;
 }
 
 .background
@@ -375,6 +378,7 @@ hr.diamondstyle
 
     transition: transform 2.0s;
     -webkit-backface-visibility: hidden;
+    pointer-events: none;
 }
 
 .backgroundoffset
@@ -415,6 +419,7 @@ hr.diamondstyle
 
     margin:0px 0px;
     -webkit-backface-visibility: hidden;
+    pointer-events: none;
 }
 
 .backgroundoffsetdouble
@@ -452,6 +457,7 @@ hr.diamondstyle
 
     margin:0px 0px;
   opacity: 1.0;
+    pointer-events: none;
 }
 
 /**/
@@ -465,6 +471,7 @@ hr.diamondstyle
     margin: 2% 2%;
     opacity: 0.175;
     border:thin solid #aaa;
+    pointer-events: none;
 }
 
 
@@ -487,7 +494,7 @@ hr.diamondstyle
   height: 100%;
         overflow-y:hidden;
         overflow-x:hidden;
-        pointer-events: none;
+      pointer-events: auto;
 }
 
 #core
@@ -1162,6 +1169,7 @@ p.seperator
 activenote
 {
     cursor:pointer;
+          pointer-events: all;
     border: none;
     border-left: 1px solid #d9c293;
     margin-left: 0px;
