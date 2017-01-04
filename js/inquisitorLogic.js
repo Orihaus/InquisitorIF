@@ -32,6 +32,11 @@ Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocation
         }
     }
 
+    if( inquisitor.world.rawlocations[targetlocationindex].parentid == startlocationindex )
+    {
+      result.mutualdirection = inquisitor.world.rawlocations[targetlocationindex].parentdirection;
+    }
+
     if ( initiatinglink !== undefined && initiatinglink !== null )
     {
         if ( initiatinglink.hasconditional )
@@ -172,7 +177,7 @@ Inquisitor.prototype.updatedirector = function()
         {
           inquisitor.logic.lastlastWorldLocationID = inquisitor.logic.lastWorldLocationID;
           persistentworld.store.lastWorldLocationID = persistentworld.store.currentWorldLocationID;
-          persistentworld.store.currentWorldLocationID = inquisitor.findlocationbytitle( rules[index].effectparameter );
+          persistentworld.store.currentWorldLocationID = inquisitor.findlocationbytitle( rules[index].effectparameter, persistentworld.store.currentWorldLocationID );
 
           persistentworld.rulestriggered[index] = true;
         }
@@ -256,8 +261,8 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
             inquisitor.crossfadeelement( $( "#notecontinue" ), 1500, 0, "\n..." );
             $( "#endofnote" ).hide();
             //$( "#diamond" ).hide();
-            $( "#note" ).stop();
-            $( "#note" ).animate( { scrollTop: ourheight }, ourtime );
+            //$( "#note" ).stop();
+          //  $( "#note" ).animate( { scrollTop: ourheight }, ourtime );
 
             //setTimeout( function () { updatetime(); }, readtime );
 
@@ -302,27 +307,35 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
         }
     }
 
-    inquisitor.toggletimeline();
-
     if ( ( persistentworld.world.state === 'linear' || persistentworld.world.state === 'linearinterface' ) ) //&& dialoguecount > 1
     {
         var sectionholderhtml = '';
-        var dialoguecount = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length;
+        var segmentcount = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length;
         var alreadyactivated = false;
-        for ( var dialogueindex = dialoguecount - 1; dialogueindex > 0; dialogueindex-- )
-        {
-            if ( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments[dialogueindex].isbreak || dialogueindex === 1 )
-            {
-                var allowactivation = inquisitor.logic.currentlocationprogress >= inquisitor.logic.dialogueindex && !alreadyactivated;
-                if ( allowactivation )
-                {
-                    alreadyactivated = true;
-                }
-                sectionholderhtml = "<h3 id='section" + dialogueindex + "'" + ( allowactivation ? " class='activesection'" : '' ) + "></h3>" + sectionholderhtml;
-            }
+        var hasbreak = false;
+
+          for ( var segmentindex = segmentcount - 1; segmentindex > 0; segmentindex-- )
+          {
+              if ( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments[segmentindex].isbreak || ( segmentindex === 1 ) )
+              {
+                  if( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments[segmentindex].isbreak && !hasbreak )
+                  {
+                    hasbreak = true;
+                  }
+
+                  var allowactivation = inquisitor.logic.currentlocationprogress >= inquisitor.logic.dialogueindex && !alreadyactivated;
+                  if ( allowactivation )
+                  {
+                      alreadyactivated = true;
+                  }
+                  sectionholderhtml = "<h3 id='section" + segmentindex + "'" + ( allowactivation ? " class='activesection'" : '' ) + "></h3>" + sectionholderhtml;
+              }
         }
 
-        $( "#sectionholderrotator" ).html( sectionholderhtml );
+        if( hasbreak )
+        {
+          $( "#sectionholderrotator" ).html( sectionholderhtml );
+        }
     }
 
     if ( persistentworld.world.state !== 'stateless' && persistentworld.world.state !== 'linear' && persistentworld.world.state !== 'linearinterface' && !inquisitor.logic.indialogue )
@@ -385,7 +398,13 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
         $( "#diamondcontainer" ).addClass( "alwaysHide" );
     }
 
+    //
+
+    inquisitor.updatedialogue();
+
     var descsegments = inquisitor.updatedescription();
+
+    //
 
     if ( doshow && inquisitor.logic.conceptsover )
     {
@@ -425,14 +444,25 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
     }
 
     inquisitor.render.backgroundimageurl = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundimage;
+    inquisitor.render.backgroundopacity  = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundopacity;
     inquisitor.render.color = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).color;
 
     $.smoothScroll( {
         scrollElement: $( '#div4' ),
-        speed: 1000,
+        speed: 4000,
         easing: 'swing',
-        offset: $( '#note' ).height(), //$( '#note' ).height
+        offset: $( '#note' ).get(0).scrollHeight, //$( '#note' ).height
     } );
 
     //console.log( $( '#note' ).height() );
+
+    $( "#debug" ).html( inquisitor.render.log );
+    $.smoothScroll( {
+        scrollElement: $( '#debug' ),
+        speed: 4000,
+        easing: 'swing',
+        offset: $( '#debug' ).get(0).scrollHeight, //$( '#note' ).height
+    } );
+
+    inquisitor.drawcontent();
 }

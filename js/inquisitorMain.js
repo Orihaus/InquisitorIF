@@ -5,7 +5,7 @@ function Inquisitor( )
       indialogue: false,
       currenteventactive: false,
       soundmuted: false,
-      viewingtimeline: true,
+      viewingtimeline: false,
 
       escapekeyheldfor: 0,
 
@@ -29,18 +29,21 @@ function Inquisitor( )
     };
 
     this.render = {
+      showingconsole: false,
       finaldescriptionsegments: {},
       expanddescription: true,
       lastmousepagex: 0,
       lastmousepagey: 0,
       backgroundimageurltimeline: '',
       backgroundimageurl: '',
+      backgroundopacity: 1.0,
       color: "#a69471",
       currentbackgroundbuffer: "backgroundprimary",
       timelineeventsadded: 0,
       truetimelineeventsadded: 0,
       showingvessels: false,
-      lastbackground: ''
+      lastbackground: '',
+      log: ""
     };
 };
 var inquisitor = new Inquisitor();
@@ -67,11 +70,35 @@ Inquisitor.prototype.finishedParsing = function ( result )
     //inquisitor.displayworld();
 }
 
+Inquisitor.prototype.log = function( priority, text, origin )
+{
+  var allow = priority >= 0;
+
+  var prefix = "";
+  for( var i = 0; i < priority; i++ )
+  {
+    prefix += ">> ";
+  }
+  prefix += "inquisitor";
+
+  var hasorigin = origin !== null && origin !== undefined;
+  if( hasorigin )
+  {
+    prefix += origin;
+  }
+
+  if( allow )
+  {
+    var finallog = prefix + ": " + text;
+    console.log( finallog );
+    inquisitor.render.log += '— ' + finallog + '\n';
+  }
+}
+
 Inquisitor.prototype.displayworld = function( raw, index )
 {
     inquisitor.crossfadeelement( $( "#core" ), 1500, 500, null, true );
     //inquisitor.begindisplay();
-    console.log('inquisitor: displayworld()');
 }
 
 Inquisitor.prototype.createagent = function( raw, index )
@@ -84,7 +111,6 @@ Inquisitor.prototype.createagent = function( raw, index )
 
 Inquisitor.prototype.getlocation = function ( index )
 {
-    //console.log( inquisitor.world );
     return inquisitor.world.rawlocations[index];
 }
 
@@ -95,13 +121,12 @@ Inquisitor.prototype.accessreferencebufferforid = function ( index )
 
 Inquisitor.prototype.setlocation = function ( index, location )
 {
-    //console.log( inquisitor.world );
     inquisitor.world.rawlocations[index] = location;
 }
 
 Inquisitor.prototype.tryfindmutuallink = function ( linktargetid, location )
 {
-    //console.log( "inquisitor: Testing mutual link from: " + linktargetid + " to: " + location.name );
+    inquisitor.log( 0, "Testing mutual link from: " + inquisitor.world.rawlocations[linktargetid].fullname + " to: " + location.fullname );
 
     var mutualadditionlinks = inquisitor.world.rawlocations[linktargetid].linkadditions;
     var mutualoverridelinks = inquisitor.world.rawlocations[linktargetid].linkoverrides;
@@ -125,20 +150,20 @@ Inquisitor.prototype.tryfindmutuallink = function ( linktargetid, location )
         return mutuallink3;
     }
 
-    console.log( "inquisitor: No mutual link found from: " + inquisitor.world.rawlocations[linktargetid].name + " to: " + location.name );
+    inquisitor.log( 0, "No mutual link found from: " + inquisitor.world.rawlocations[linktargetid].name + " to: " + location.name );
 
     return null;
 }
 
 Inquisitor.prototype.findlocationbyfulltitle = function ( fullname )
 {
-    //console.log( "inquisitor: Looking for location: " + fullname );
+    inquisitor.log( 0, "inquisitor: Looking for location: " + fullname );
     for ( var id in inquisitor.world.rawlocations )
     {
         var location = inquisitor.getlocation( id );
         if ( fullname == location.fullname )
         {
-            //console.log( "inquisitor: Found location: " + fullname );
+            inquisitor.log( 0, "inquisitor: Found location: " + fullname );
             return location.id;
         }
     }
@@ -146,25 +171,26 @@ Inquisitor.prototype.findlocationbyfulltitle = function ( fullname )
     return -1;
 }
 
-Inquisitor.prototype.findlocationbytitle = function ( title )
+Inquisitor.prototype.findlocationbytitle = function ( title, from )
 {
     var selectedid = -1;
-    var bestoptimum = 0;
+    var bestoptimum = -1;
 
-    //console.log( "inquisitor: Looking for location: " + title );
+    inquisitor.log( 0, "Looking for location: " + title + ", from: " + inquisitor.world.rawlocations[from].fullname );
+    var segmentprogress = 0, currentoptimum = 0;
     for ( var id in inquisitor.world.rawlocations )
     {
         var location = inquisitor.world.rawlocations[id];
-        if ( title == location.name )
+        if ( title.trim() === location.name.trim() )
         {
-            //console.log( "inquisitor: Found Matching Title: " + location.fullname );
+            inquisitor.log( -1, "Found Matching Title: " + location.fullname );
 
-            var segmentprogress = 0, currentoptimum = 0;
             for ( var segmentid in location.namesegments )
             {
-                if ( location.namesegments[segmentid] === inquisitor.world.rawlocations[persistentworld.store.currentWorldLocationID].namesegments[segmentprogress] )
+                if ( location.namesegments[segmentid] === inquisitor.world.rawlocations[from].namesegments[segmentprogress] )
                 {
                     currentoptimum++;
+                    inquisitor.log( -1, "Increasing optimum for: " + location.fullname );
                 }
 
                 segmentprogress++;
@@ -173,8 +199,13 @@ Inquisitor.prototype.findlocationbytitle = function ( title )
             if ( currentoptimum >= bestoptimum )
             {
                 selectedid = id;
+                inquisitor.log( -1, "Set optimal location as: " + location.fullname );
+                bestoptimum = currentoptimum;
             }
         }
+
+        currentoptimum = 0;
+        segmentprogress = 0;
     }
 
     return selectedid;
@@ -206,18 +237,16 @@ Inquisitor.prototype.findinregions = function ( id, searchoffset )
     var region = inquisitor.world.regions;
     var regionarray = [];
 
-    //console.log( 'inquisitor: findinregions searching for region info of location, ' + location.name + ' with search offset ' + searchoffset );
-    //console.log( location.namesegments );
+    //inquisitor.log( 0, 'findinregions searching for region info of location, ' + location.name + ' with search offset ' + searchoffset );
 
     var searchindex = 0; var searchmax = ( location.namesegments.length + searchoffset );
-    //console.log( 'inquisitor: findinregions found searchmax of, ' + searchmax );
+    //inquisitor.log( '0, findinregions found searchmax of, ' + searchmax );
 
     while ( searchindex < searchmax )
     {
         var searchregion = location.namesegments[searchindex];
 
-        //console.log( 'inquisitor: found at depth ' + searchindex + ' a region for, ' + location.name + ' named ' + searchregion );
-        //console.log( region );
+        //inquisitor.log( 0, 'found at depth ' + searchindex + ' a region for, ' + location.name + ' named ' + searchregion );
 
         if ( region.children[searchregion] !== undefined && region.children[searchregion] !== null )
         {
@@ -225,8 +254,6 @@ Inquisitor.prototype.findinregions = function ( id, searchoffset )
         }
         searchindex++;
     }
-
-    //console.log( region );
 
     return region;
 }
@@ -248,12 +275,12 @@ Inquisitor.prototype.recursiveupwardsrecieve = function ( locationid, variable, 
     {
         if ( parent[variable] !== valueunused && parent[variable] !== undefined && parent[variable] !== null )
         {
-            console.log( 'inquisitor: recursiveupwardsrecieve found value, ' + parent[variable] + ' at ' + parent.name + ' returning.' )
+            inquisitor.log( -1, 'recursiveupwardsrecieve found value, ' + parent[variable] + ' at ' + parent.name + ' returning.' )
             return parent[variable];
         }
         else
         {
-            console.log( 'inquisitor: recursiveupwardsrecieve found undefined, at ' + parent.name + ' continuing upwards. Depth: ' + depth )
+            inquisitor.log( -1, 'recursiveupwardsrecieve found nothing at ' + parent.name + ' continuing upwards. Depth: ' + depth )
             return inquisitor.recursiveupwardsrecieve( locationid, variable, valueunused, depth );
         }
     }
@@ -296,7 +323,7 @@ Inquisitor.prototype.enumeratechildren = function ( id )
         {
             if ( childid != -1 )
             {
-                //console.log( "inquisitor: Enumerating Child: " + childid );
+                inquisitor.log( 0, "Enumerating Child: " + childid );
                 childrenfound.push( childid );
             }
         }
@@ -308,7 +335,6 @@ Inquisitor.prototype.enumeratechildren = function ( id )
 Inquisitor.prototype.traverselinearlocation = function ()
 {
     persistentworld.world.linearlocationprogress++;
-    //console.log( inquisitor.world.linearlocations );
     return inquisitor.world.linearlocations[persistentworld.world.linearlocationprogress-1];
 }
 
@@ -348,7 +374,7 @@ Inquisitor.prototype.enumeratesiblings = function ( id )
                     if ( !inquisitor.world.rawlocations[childid].isobject && !inquisitor.world.rawlocations[id].isobject )
                     {
                         var siblingname = insidesiblingsubregion ? siblingname : siblingsubregion;
-                        //console.log( "inquisitor: Enumerating Sibling: " + childid + ". Giving Name: " + siblingname );
+                        inquisitor.log( 0, "Enumerating Sibling: " + childid + ". Giving Name: " + siblingname );
                         results.siblingsfound.push( childid );
                     }
                 }
@@ -376,6 +402,36 @@ Inquisitor.prototype.findpreviousreferencetitle = function ( inputreferenceid )
     return inputreferencename;
 }
 
+Inquisitor.prototype.recursiveregionsearchbytitle = function ( currentregion, regiontitle )
+{
+    for ( var childid in currentregion.children )
+    {
+        var childregion = currentregion.children[childid];
+        inquisitor.recursiveregionsearchbytitle( childregion, regiontitle );
+
+        if( childregion.name === regiontitle )
+        {
+          return childregion;
+        }
+
+      //  console.log( childregion.name );
+    }
+}
+
+Inquisitor.prototype.recursivechildenumerate = function ( regiontitle, enumarray )
+{
+    var parent = inquisitor.recursiveregionsearchbytitle( inquisitor.world.regions, regiontitle );
+    if ( parent !== null && parent !== undefined )
+    {
+        for ( var childid in parent.children )
+        {
+            var childregion = parent.children[childid];
+            enumarray.push( childregion.firstid );
+            inquisitor.recursivechildenumerate( childregion, enumarray );
+        }
+    }
+}
+
 Inquisitor.prototype.processlinkadditions = function ( id )
 {
     var availableadditions = [];
@@ -387,19 +443,27 @@ Inquisitor.prototype.processlinkadditions = function ( id )
         var linklocationid = inquisitor.findlocationbyfulltitle( link.target );
         if ( linklocationid === -1 )
         {
-            linklocationid = inquisitor.findlocationbytitle( link.target );
+            linklocationid = inquisitor.findlocationbytitle( link.target, id );
         }
 
-        if ( linklocationid != -1 && !link.inlinelinkreference )
+        if( link.iswildcard )
+        {
+            var wildcardlocations = [];
+            inquisitor.recursivechildenumerate( link.target, wildcardlocations );
+            linklocationid = wildcardlocations[Math.floor( Math.random() * wildcardlocations.length )];
+            link.linkdirection = Math.floor( Math.random() * 4 ) + 1;
+        }
+
+        if ( linklocationid !== -1 && !link.inlinelinkreference )
         {
             var finallinktitle = link.title === '' ? inquisitor.world.rawlocations[linklocationid].name : link.title;
 
-            availableadditions.push( { index: linklocationid, title: finallinktitle, initiatinglink: link } );
-            //console.log( "inquisitor: Adding link to: " + linklocationid );
+            availableadditions.push( { index: linklocationid, title: finallinktitle, initiatinglink: link, iswildcard: link.iswildcard } );
+            inquisitor.log( 0, "Adding link to: " + inquisitor.world.rawlocations[linklocationid].fullname );
         }
         else
         {
-            console.log( "inquisitor: Bad link" );
+            inquisitor.log( 1, "Bad link. Title: " + link.target );
         }
     }
 
@@ -423,9 +487,6 @@ Inquisitor.prototype.processtimelineevent = function ( event )
     //
 
     var referencehtml = '<li><a id="r' + inquisitor.render.timelineeventsadded + '" data="' + event.timeline.backgroundurl + '" href="#0" ' + firsteventhtml + ' data-date="' + datehtml + ">" + event.timeline.displaydate + '</a></li>';
-
-    //console.log( referencehtml );
-    //console.log( elementhtml );
 
     inquisitor.render.timelineeventsadded++;
     inquisitor.render.truetimelineeventsadded++;
@@ -503,21 +564,21 @@ Inquisitor.prototype.findlinks = function ( id )
     var siblings = inquisitor.enumeratesiblings( id ).siblingsfound;
     for( var index in siblings )
     {
-        //console.log( "inquisitor: Found Sibling: " + siblings[index] );
+        inquisitor.log( 0, "Found Sibling: " + siblings[index] );
         potentiallinks.push( siblings[index] );
     }
 
     var children = inquisitor.enumeratechildren( id );
     for ( var index in children )
     {
-        //console.log( "inquisitor: Found Child: " + children[index] );
+        inquisitor.log( 0, "Found Child: " + children[index] );
         potentiallinks.push( children[index] );
     }
 
     var additions = inquisitor.processlinkadditions( id );
     for ( var index in additions )
     {
-        //console.log( "inquisitor: Found Link Additon: " + additions[index] );
+        inquisitor.log( 0, "Found Link Additon: " + additions[index] );
         potentiallinks.push( additions[index].index );
     }
 
@@ -541,15 +602,18 @@ Inquisitor.prototype.findlinks = function ( id )
           if( index !== indextwo )
           {
             isduplicate = ( potentiallinks[index] === potentiallinks[indextwo] );
+
+            if( isduplicate )
+            {
+              inquisitor.log( 1, "Link to: " + potentiallinks[index] + ", is a duplicate." );
+            }
           }
         }
-
-        console.log( "inquisitor: link to: " + potentiallinks[index] + ", isduplicate: " + isduplicate );
 
         var result = inquisitor.cantraverse( id, potentiallinks[index], null, true );
         if( result.success && !isduplicate)
         {
-            //console.log( "inquisitor: Allowing link to: " + potentiallinks[index] );
+            inquisitor.log( 0, "Allowing link to: " + potentiallinks[index] );
             links.push( potentiallinks[index] );
         }
     }
@@ -583,14 +647,28 @@ Inquisitor.prototype.rebuildregions = function ()
         if ( recievedbackgroundimage !== null && recievedbackgroundimage !== undefined )
         {
             location.backgroundimage = recievedbackgroundimage;
-            console.log( "inquisitorParse: Found parent background: " + location.backgroundimage );
+            inquisitor.log( 0, "Found parent background: " + location.backgroundimage );
         }
 
-        var recievedcolor = inquisitor.recursiveupwardsrecieve( index, 'color', '' );
+        var recievedbackgroundopacity = inquisitor.recursiveupwardsrecieve( index, 'backgroundopacity', '0.3' );
+        if ( recievedbackgroundopacity !== null && recievedbackgroundopacity !== undefined )
+        {
+            location.backgroundopacity = recievedbackgroundopacity;
+            inquisitor.log( 0, "Found parent backgroundopacity: " + location.backgroundopacity );
+        }
+
+        var recievedbackgroundbrightness = inquisitor.recursiveupwardsrecieve( index, 'backgroundbrightness', '0.5' );
+        if ( recievedbackgroundbrightness !== null && recievedbackgroundbrightness !== undefined )
+        {
+            location.backgroundbrightness = recievedbackgroundbrightness;
+            inquisitor.log( 0, "Found parent backgroundbrightness: " + location.backgroundbrightness );
+        }
+
+        var recievedcolor = inquisitor.recursiveupwardsrecieve( index, 'color', '#eeeeee' );
         if ( recievedcolor !== null && recievedcolor !== undefined )
         {
             location.color = recievedcolor;
-            console.log( "inquisitorParse: Found parent color: " + location.color );
+            inquisitor.log( 0, "Found parent color: " + location.color );
         }
 
         var recievedstate = inquisitor.recursiveupwardsrecieve( index, 'state', 'stateless' );
@@ -599,16 +677,14 @@ Inquisitor.prototype.rebuildregions = function ()
             location.state = recievedstate;
             if ( location.state === 'linear' )
             {
-                //console.log( "inquisitorParse: Found linear state. " );
+                inquisitor.log( 0, "Found linear state." );
                 inquisitor.world.linearlocations.push( location.id );
             }
-            console.log( "inquisitorParse: Found parent state: " + location.state );
+            inquisitor.log( 0, "Found parent state: " + location.state );
         }
 
         inquisitor.setlocation( index, location );
     }
-
-    console.log( inquisitor.world.regions );
 }
 
 Inquisitor.prototype.placeentityinworld = function ( entityindex, locationindex )
@@ -671,7 +747,7 @@ Inquisitor.prototype.updateentities = function ()
             var links = inquisitor.findlinks( parentid );
             for ( var linkindex in links )
             {
-                //console.log( "inquisitor: Possible location to link to: " + inquisitor.getlocation( links[linkindex] ).fullname );
+                inquisitor.log( 0, "Possible location for agent to link to: " + inquisitor.getlocation( links[linkindex] ).fullname );
             }
 
             var finallinkindex;
@@ -685,8 +761,7 @@ Inquisitor.prototype.updateentities = function ()
                 break;
             }
 
-            //console.log( inquisitor.world.entities );
-            console.log( "inquisitor: Moving to: " + inquisitor.getlocation( finallinkindex ).fullname + ", from: " + inquisitor.getlocation( parentid ).fullname );
+            inquisitor.log( 1, "Agent moving to: " + inquisitor.getlocation( finallinkindex ).fullname + ", from: " + inquisitor.getlocation( parentid ).fullname );
             inquisitor.placeentityinworld( inquisitor.world.entities[index], finallinkindex );
         }
     }
@@ -764,14 +839,14 @@ Inquisitor.prototype.writelocationinfo = function ( location )
     {
         location.fullname += location.namesegments[index] + ( ( index < location.namesegments.length - 1 ) ? " - " : "" );
     }
-    //console.log( "inquisitorParse: Recreated full name: " + location.fullname );
+    inquisitor.log( 0, "Recreated full name: " + location.fullname );
 
     location.region = location.namesegments[0];
     location.subregion = location.namesegments[1];
     location.name = location.namesegments[location.namesegments.length - 1];
 
-    //console.log( "inquisitorParse: Found location region: " + location.region );
-    //console.log( "inquisitorParse: Found location name: " + location.name );
+    inquisitor.log( 0, "Found location region: " + location.region );
+    inquisitor.log( 0, "Found location name: " + location.name );
 
     return location;
 };
@@ -797,6 +872,8 @@ Inquisitor.prototype.findparent = function ( result, location )
                     firstid: location.id,
                     isobject: location.isobject,
                     backgroundimage: location.backgroundimage,
+                    backgroundopacity: location.backgroundopacity,
+                    backgroundbrightness: location.backgroundbrightness,
                     color: location.color,
                     state: location.state,
                     children: {},

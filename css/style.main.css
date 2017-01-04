@@ -1,7 +1,7 @@
 ﻿*						{ margin:0;padding:0;border:0;outline:0;text-decoration:none;font-weight:inherit;font-style:inherit;color:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;list-style:none;border-collapse:separate;border-spacing:0;}
 
-html 
-{ 
+html
+{
     background-color: #040404 !important; color:#111;
     background:url('../img/nome_002.jpg') no-repeat center center fixed;
     -webkit-background-size: cover;
@@ -9,34 +9,34 @@ html
     -o-background-size: cover;
     background-size: cover;
 }
-#core 
-{ 
+#core
+{
     max-width: 700px; margin:0px auto; font-size:92%; line-height:1.4em; font-family: 'Cardo', serif; color:#d8d8d8; letter-spacing:0.042em;
     padding-left:50px; padding-right:50px; padding-top:0px; background-color:rgba(0, 0, 0, 0.333); font-weight:400;
     display:block;
 }
 
-#exitprompt 
+#exitprompt
 {
     text-align:center;
-    font-size:75%; 
+    font-size:75%;
     position: fixed;
     font-family: 'Cardo', serif;
     letter-spacing: 2px;
-        text-transform: uppercase; 
-    color:#d8d8d8; 
+        text-transform: uppercase;
+    color:#d8d8d8;
     font-weight:100;
 }
 
-#clearprompt 
+#clearprompt
 {
     text-align:center;
-    font-size:75%; 
+    font-size:75%;
     position: fixed;
     font-family: 'Cardo', serif;
     letter-spacing: 2px;
-        text-transform: uppercase; 
-    color:#d8d8d8; 
+        text-transform: uppercase;
+    color:#d8d8d8;
     font-weight:100;
 }
 
@@ -46,7 +46,7 @@ p.finalfader {
     position: fixed;
     pointer-events:none;
     padding: 0;
-    margin:0px auto; 
+    margin:0px auto;
     background: linear-gradient(to bottom, rgba(0,0,0,0.333) 0%,rgba(0,0,0,0.0) 100%);
         height: 50%;
 }
@@ -64,7 +64,7 @@ p.historyfader {
 
 /* Glyph, by Harry Roberts */
 
-hr.style-one 
+hr.style-one
 {
     padding: 0;
     border: none;
@@ -77,8 +77,8 @@ hr.style-one
 hr.style-eight {
     margin-right: 0%;
     margin-left: 0%;
-    margin-top:30px; 
-    margin-bottom:10px; 
+    margin-top:30px;
+    margin-bottom:10px;
     padding: 0;
     border: none;
     border-top: medium double #111;
@@ -96,7 +96,7 @@ hr.style-eight:after {
     color: #aaa;
 }
 
-#div4 
+#div4
 {
    z-index: 9999;
    position: relative;
@@ -105,67 +105,67 @@ hr.style-eight:after {
 }
 
 h5
-{ 
-    font-size: 100%; 
-    text-align: left; 
-    margin-bottom:5px; 
-    text-transform: uppercase; 
-    font-family: 'Cinzel', sans-serif; 
-    font-weight:400; 
+{
+    font-size: 100%;
+    text-align: left;
+    margin-bottom:5px;
+    text-transform: uppercase;
+    font-family: 'Cinzel', sans-serif;
+    font-weight:400;
     letter-spacing: 2px;
 }
 
-#dock 
+#dock
 {
     max-width: 100%; margin:0px auto; font-size:95%; line-height:1.4em; font-family: 'Crimson Text', serif; color:#dfdfdf; letter-spacing:0.05em;
     padding-top:15px; padding-bottom:15px; padding-left:50px; padding-right:50px; background-color:rgba(0, 0, 0, 0.0); font-weight:200;
-    text-align:left;     
+    text-align:left;
     vertical-align: bottom;
 }
 
-h1 
-{ 
+h1
+{
     font-size:200%;
-    color:#eaeaea; 
-    text-align: center; 
+    color:#eaeaea;
+    text-align: center;
     margin-top:10px;
-    margin-bottom:20px; 
-    text-transform: uppercase; 
-    font-family: 'Cinzel', sans-serif; 
-    font-weight:200; 
-    letter-spacing: 10px; 
+    margin-bottom:20px;
+    text-transform: uppercase;
+    font-family: 'Cinzel', sans-serif;
+    font-weight:200;
+    letter-spacing: 10px;
     line-height:1.07em;
     z-index: 999;
 }
-h1::first-letter { 
+h1::first-letter {
     /*font-family: 'Cinzel Decorative', sans-serif;*/
 }
-h2 
-{ 
-    font-size:75%; 
-    text-align: center; 
-    margin-bottom:5px; 
-    text-transform: uppercase; 
-    font-family: 'Cinzel', sans-serif; 
-    font-weight:400; 
+h2
+{
+    font-size:75%;
+    text-align: center;
+    margin-bottom:5px;
+    text-transform: uppercase;
+    font-family: 'Cinzel', sans-serif;
+    font-weight:400;
     letter-spacing: 2px
 }
 
-h3 
-{ 
-    font-size:100%; 
-    text-align: center; 
-    text-transform: uppercase; 
-    font-family: 'Cinzel', sans-serif; 
+h3
+{
+    font-size:100%;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: 'Cinzel', sans-serif;
     font-weight:400;
-    letter-spacing: 2px;   
+    letter-spacing: 2px;
     white-space: pre-wrap;
 }
 
 combination
 {
     font-size:150%;
-    font-family: 'Cinzel', sans-serif; 
+    font-family: 'Cinzel', sans-serif;
     font-weight:400;
 
     -webkit-touch-callout: none;
@@ -177,18 +177,18 @@ combination
     letter-spacing: 2px;
 }
 
-h4 
-{ 
+h4
+{
     font-size:medium;
-    text-align: center; 
-    margin-top:25px; 
-    text-transform: uppercase; 
-    font-family: 'Cinzel', sans-serif; 
-    font-weight:400; 
-    letter-spacing: 3px;   
+    text-align: center;
+    margin-top:25px;
+    text-transform: uppercase;
+    font-family: 'Cinzel', sans-serif;
+    font-weight:400;
+    letter-spacing: 3px;
     white-space: pre-wrap;
 }
-p { 
+p {
     white-space: pre-line;
     word-wrap: normal;
     -webkit-font-smoothing: antialiased;
@@ -198,12 +198,12 @@ faded {
     color:rgba(255, 255, 255, 0.25);
 }
 
-div.dialogue 
+div.dialogue
 {
     width: 150%;
-    font-size:107%; 
+    font-size:107%;
     line-height:1.27em;
-    max-width: 1900px; 
+    max-width: 1900px;
     position:relative;
     text-align: center;
     left: -75%;
@@ -214,11 +214,11 @@ div.dialogue
     padding-bottom: 20px;
     padding-top: 20px;
 }
-emphasis 
+emphasis
 {
     font-weight: 800;
 }
-p.dialoguefader 
+p.dialoguefader
 {
     width: 100%;
     left: -50px;
@@ -236,31 +236,31 @@ p.dialoguefader
     background: linear-gradient(to bottom, rgba(0,0,0,0.0) 0%,rgba(0,0,0,0.9) 100%);
 }
 
-p.seperator 
+p.seperator
 {
     font-family: 'Cinzel Decorative', sans-serif;
     text-align: center;
 }
 
 activenote
-{ 
+{
     font-style: italic;
     cursor:pointer;
     /*-webkit-animation: fadeout 1s, fadein 3s;
     animation: fadeout 1s, fadein 3s;*/
 }
-activenote:hover 
+activenote:hover
 {
     font-weight:bold;
 }
 
 activenoteinactive
-{ 
+{
     /*-webkit-animation: fadeout 1s, fadein 3s;
     animation: fadeout 1s, fadein 3s;*/
 }
 
-notetitle 
+notetitle
 {
     text-align:right;
     width:100%;
@@ -269,8 +269,8 @@ notetitle
 }
 
 first {
-    font-family: 'Playfair Display SC', serif; 
-    font-size:108%; 
+    font-family: 'Playfair Display SC', serif;
+    font-size:108%;
     font-weight:400;
 }
 quote {
@@ -280,20 +280,20 @@ history {
     margin-top:10px;
     color:#757575;
 }
-#objects 
+#objects
 {
 }
-#objects 
+#objects
 {
 }
-vessel:hover 
+vessel:hover
 {
     text-shadow: 0px 0px 4px rgba(255,255,255,0.75);
-    color:#fff; 
+    color:#fff;
 }
 
 
-#eventmynobackground 
+#eventmynobackground
 {
     background-color: rgba(255,0,0,0.0);
 	text-align: center;
@@ -306,7 +306,7 @@ vessel:hover
     z-index: 999;
 }
 
-#eventprompt 
+#eventprompt
 {
     background-color: rgba(255,0,0,0.0);
 	text-align: center;
@@ -337,7 +337,7 @@ p.eventexclusionfader
     background: linear-gradient(to top, rgba(0,0,0,0.0) 0%,rgba(0,0,0,0.95) 100%);
 }
 
-div.eventactive 
+div.eventactive
 {
     width: 150%;
     margin-left: -25%;
@@ -356,7 +356,7 @@ div.eventinactive
     border-left: medium double #7a7a7a;
 }
 
-img.eventdeco 
+img.eventdeco
 {
     position:absolute;
     text-align: center;
@@ -368,7 +368,7 @@ img.eventdeco
     opacity: 0.7;
 }
 
-#righticonbar 
+#righticonbar
 {
     display:block;
     position:relative;
@@ -377,13 +377,13 @@ img.eventdeco
     height: 0px;
     top: 0px;
     z-index: 999;
-    margin:0px auto; 
+    margin:0px auto;
     transform: scale(0.25);
     opacity: 1.0;
     background-color:rgba(255, 0, 0, 0.5);
 }
 
-#lefticonbar 
+#lefticonbar
 {
     display:block;
     position:relative;
@@ -392,20 +392,20 @@ img.eventdeco
     height: 0px;
     top: 0px;
     z-index: 999;
-    margin:0px auto; 
+    margin:0px auto;
     transform: scale(0.25);
     opacity: 1.0;
     background-color:rgba(255, 0, 0, 0.5);
 }
 
-img.leftbaricon 
+img.leftbaricon
 {
     opacity: 0.1;
     cursor:pointer;
     left: 75px;
 }
 
-img.Has 
+img.Has
 {
     opacity: 0.5;
 }
@@ -415,7 +415,7 @@ img.leftbaricon:hover
     opacity: 0.9;
 }
 
-img.rightbaricon 
+img.rightbaricon
 {
     opacity: 0.1;
     cursor:pointer;
@@ -432,7 +432,7 @@ img.rightbaricon:hover
     transform: scaleY(-1.0);
 }
 
-p.eventfader 
+p.eventfader
 {
     width: 100%;
     left: 0px;
@@ -443,7 +443,7 @@ p.eventfader
     background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.9) 100%);
 }
 
-#footerdeco 
+#footerdeco
 {
     position:absolute;
     text-align: center;
@@ -456,7 +456,7 @@ p.eventfader
     opacity: 0.07;
 }
 
-#prompttext 
+#prompttext
 {
     position:absolute;
     text-align: center;
@@ -466,13 +466,13 @@ p.eventfader
     z-index: 999;
         cursor:pointer;
 }
-#prompttext:hover 
+#prompttext:hover
 {
     text-shadow: 0px 0px 4px rgba(255,255,255,0.75);
-    color:#fff; 
+    color:#fff;
 }
 
-#currentitem 
+#currentitem
 {
     background-color: rgba(255,0,0,0.0);
 	text-align: center;
@@ -485,26 +485,26 @@ p.eventfader
     pointer-events: none;
 }
 
-p.destinations 
-{ 
-    font-size:100%; 
-    text-align: center; 
+p.destinations
+{
+    font-size:100%;
+    text-align: center;
     text-transform: uppercase;
-    font-family: 'Cinzel', sans-serif; 
+    font-family: 'Cinzel', sans-serif;
     font-weight:400;
-    letter-spacing: 2px;   
+    letter-spacing: 2px;
     white-space: pre-wrap;
     margin-top:20px;
 
     color:#eeeeee; cursor:pointer;
     /*-webkit-animation: fadeout 1s, fadein 3s;
     animation: fadeout 1s, fadein 3s;*/
-    line-height: 1.17em; 
+    line-height: 1.17em;
 }
 
 
 div.main p::after { content:"";}
-p:not(.history):not(.destinations):not(.dialogue):first-letter { 
+p:not(.history):not(.destinations):not(.dialogue):first-letter {
     font-family: 'Cinzel Decorative', sans-serif;
     font-size:215%;
     font-weight:bold;
@@ -532,7 +532,7 @@ body {
     left: 20px;
     bottom: 20px;
     right: 20px;
-    padding: 30px; 
+    padding: 30px;
     overflow-y: scroll;
     overflow-x: hidden;
 }
@@ -540,12 +540,12 @@ body {
 ::-webkit-scrollbar {
     width: 5px;
 }
- 
+
 ::-webkit-scrollbar-track {
     -webkit-border-radius: 1px;
     border-radius: 10px;
 }
- 
+
 ::-webkit-scrollbar-thumb {
     -webkit-border-radius: 1px;
     border-radius: 1px;

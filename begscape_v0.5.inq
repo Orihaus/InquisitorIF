@@ -1,0 +1,44 @@
+>?begscape0.5
+
+~Introduction - Begscape
+>?linearinterface
+>begscape_homeless_01b.png:0.4:0.7
+>#e57740
+Highly randomized fantasy begging sim or bleak slot machine poem.
+
+<<50
+
+//Outskirts of:Hinderlands of:The road to<#REPEATINDEX_CITY_OUTSKIRTS//
+//Eru:Ar:Ba:Va:Zi:Mur:La:Xa:Min:El:Evi:Mi:Ela:I:A:Y:G:O:X:Z+ma:za:ko:qu:wa:di:iz:az:al:xa:ler:i:a:d:s:o:ad+ +Peninsular:Barrows:Highlands:Zone<#REPEATINDEX_CITY_PROVENCE//
+//Eru:Ar:Ba:Va:Zi:Mur:La:Xa:Min:El:Evi:Mi:Ela:I:A:Y:G:O:X:Z+ma:za:ko:qu:wa:di:iz:az:al:xa:ler:i:a:d:s:o:ad+ga:ro:ili:va:di:vu:xi:tel:zor:me:xa:i:a:u:x:n:t:aro:o:::::::::::::::::::+ti:o:a:i:xet:ma:zr:nak:ona:rna:het:la:mi:::::::::::::::::::::::::::::::::<#REPEATINDEX_CITY_NAME//
+//city:port:village:town:citadel<#REPEATINDEX_CITY_TYPE//
+//brown:red:blue:green:pale:dark:ivory:white:black:yellow:orange:purple:grey:crimson:ebony:magenta:turquoise<#REPEATINDEX_CITY_COLOR_ONE//
+//clay:stone:wood:bricks:metal<#REPEATINDEX_CITY_MATERIAL_ONE//
+//brown:red:blue:green:pale:dark:ivory:white:black:yellow:orange:purple:grey:crimson:ebony:magenta:turquoise:pink<#REPEATINDEX_CITY_COLOR_TWO//
+//thatch:driftwood:mud daubings:bones:curtains:reeds:tiles:seashells:glass<#REPEATINDEX_CITY_MATERIAL_TWO//
+//pillars:alleyways:canals:sewers:wagons:dovecotes:sentry towers:forges:smokehouses:breweries:dance pits:pleasure dens:towers:granaries:gardens:statues:mansions:huts:graves:soldiers:dancers:crows:chasms:fountains:flowers:children:parades:vineyards:duels:catacombs:slums:miracles:waterfalls:storms<#REPEATINDEX_CITY_QUIRK_ONE//
+//churches:places of worship:temples:arenas:spires:orchards:festivals:monuments:gambling parlors:hedge mazes:stables:racetracks:thieves:ruins:executions:prisons:bakeries:cheesemakers:butchers:riots:religions:cults:murders:revelries:snakes:kites:quarries:assassinations:stranglings:waterfalls:idols:crones:trees:docks:flies<#REPEATINDEX_CITY_QUIRK_TWO//
+
+~The Begscape - \\#REPEATINDEX_CITY_PROVENCE\\ - The \\#REPEATINDEX_CITY_TYPE\\ of \\#REPEATINDEX_CITY_NAME\\ - \\#REPEATINDEX_CITY_OUTSKIRTS\\ \\#REPEATINDEX_CITY_NAME\\
+>?world
+>begscape_homeless_01b.png:0.4:0.7
+>#e57740
+They call this place \\#REPEATINDEX_CITY_NAME\\.
+
+[The \\#REPEATINDEX_CITY_TYPE\\ of \\#REPEATINDEX_CITY_NAME\\:Enter]
+
+~The Begscape - \\#REPEATINDEX_CITY_PROVENCE\\ - The \\#REPEATINDEX_CITY_TYPE\\ of \\#REPEATINDEX_CITY_NAME\\
+\\#REPEATINDEX_CITY_NAME\\ is a \\#REPEATINDEX_CITY_TYPE\\ of \\#REPEATINDEX_CITY_COLOR_ONE\\ \\#REPEATINDEX_CITY_MATERIAL_ONE\\ and \\#REPEATINDEX_CITY_COLOR_TWO\\ \\#REPEATINDEX_CITY_MATERIAL_TWO\\. There are many \\#REPEATINDEX_CITY_QUIRK_ONE\\ and \\#REPEATINDEX_CITY_QUIRK_TWO\\.
+
+[*The Begscape:Continue on your journey.]
+[*The Begscape:Continue on your journey.]
+[*The Begscape:Continue on your journey.]
+[*The Begscape:Continue on your journey.]
+[\\#REPEATINDEX_CITY_OUTSKIRTS\\ \\#REPEATINDEX_CITY_NAME\\:?Never]
+
+<<
+
+`What is the Timeline?|May 21st, 2002|21/05/2002|silver/viaroma-11_cleaned.png
+"Quisque elit odio, suscipit quis erat non, vehicula fermentum nunc. Curabitur laoreet dapibus leo, sit amet laoreet mi sodales sed. Aliquam et augue ultricies, pellentesque dolor sit amet, mollis lectus. Sed sed elementum ligula. Nam nec sodales mauris."
+@-Cena, John (2016). "A quote example".@@
+The timeline system is useful for providing an appendix of sorts for more historically oriented works. You can navigate using the left and right arrow keys.

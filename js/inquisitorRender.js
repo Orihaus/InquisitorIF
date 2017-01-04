@@ -254,32 +254,44 @@ Inquisitor.prototype.redrawbackground = function()
     //console.log( "inquisitorRender: requesting background change from: " + inquisitor.render.backgroundimageurl + " to: " + inquisitor.render.lastbackground + " ...");
     if ( !( inquisitor.render.backgroundimageurl === '' || inquisitor.render.lastbackground === inquisitor.render.backgroundimageurl ) )
     {
-        console.log( "inquisitorRender: Allowing background change from: " + inquisitor.render.backgroundimageurl + " to: " + inquisitor.render.lastbackground );
+        inquisitor.log( 0, "Allowing background change from: " + inquisitor.render.backgroundimageurl + " to: " + inquisitor.render.lastbackground, "Render" );
 
         $( '#' + inquisitor.render.currentbackgroundbuffer ).fadeOut( 1200 );
         inquisitor.render.currentbackgroundbuffer = ( inquisitor.render.currentbackgroundbuffer === 'backgroundprimary' ? 'backgroundsecondary' : 'backgroundprimary' );
 
         $( '#' + inquisitor.render.currentbackgroundbuffer ).css( "background-image", "url(img/" + inquisitor.render.backgroundimageurl + ")" );
-        $( '#' + inquisitor.render.currentbackgroundbuffer ).fadeIn( 1200 );
+        $( '#' + inquisitor.render.currentbackgroundbuffer ).fadeTo( 1200, inquisitor.render.backgroundopacity );
         inquisitor.render.lastbackground = inquisitor.render.backgroundimageurl;
 
-        //console.log( inquisitor.render.currentbackgroundbuffer );
+        var backgroundfiltercss = "blur(4px) brightness(" + inquisitor.render.backgroundbrightness + ") saturate(0.75)";
+        $('#' + inquisitor.render.currentbackgroundbuffer )
+        .css({
+           'filter'         : backgroundfiltercss,
+           '-webkit-filter' : backgroundfiltercss,
+           '-moz-filter'    : backgroundfiltercss,
+           '-o-filter'      : backgroundfiltercss,
+           '-ms-filter'     : backgroundfiltercss
+        });
+
+        console.log( backgroundfiltercss );
     }
+
+    //$( '#' + inquisitor.render.currentbackgroundbuffer ).css( 'opacity', inquisitor.render.backgroundopacity );
 
     //
 
-    if( inquisitor.render.color !== '' )
-    {
+    //if( inquisitor.render.color !== '' )
+    //{
       var processedcolor = inquisitor.hexToRgb( inquisitor.render.color );
 
       //console.log( "inquisitorRender: color: " + inquisitor.render.color );
 
       var highopacitycolor = "rgba("+processedcolor.r+", "+processedcolor.g+", "+processedcolor.b+", "+1.0+")";
-      var midopacitycolor  = "rgba("+processedcolor.r+", "+processedcolor.g+", "+processedcolor.b+", "+0.325+")";
+      var midopacitycolor  = "rgba("+processedcolor.r+", "+processedcolor.g+", "+processedcolor.b+", "+0.25+")";
 
       //
 
-      $( '#note' ).css( "border-left-color", midopacitycolor );
+      //$( '#note' ).css( "border-left-color", midopacitycolor );
       $( 'first' ).css( "color", highopacitycolor );
 
       $( 'diamond' ).css( "border-top-color", midopacitycolor );
@@ -303,7 +315,7 @@ Inquisitor.prototype.redrawbackground = function()
       $( '#location' ).css( "color", highopacitycolor );
       $( 'activesection' ).css( "background-color", highopacitycolor );
       $( 'p.destinations' ).css( "color", highopacitycolor );
-    }
+    //}
 }
 
 Inquisitor.prototype.crossfadefix = function( element )
@@ -456,7 +468,7 @@ Inquisitor.prototype.processBodyText = function( inputdescriptionsegments, iseve
                       var linklocationid = inquisitor.findlocationbyfulltitle( destination );
                       if ( linklocationid === -1 )
                       {
-                          linklocationid = inquisitor.findlocationbytitle( destination );
+                          linklocationid = inquisitor.findlocationbytitle( destination, persistentworld.store.currentWorldLocationID );
                       }
 
                       //console.log( link );
@@ -507,6 +519,83 @@ Inquisitor.prototype.processBodyText = function( inputdescriptionsegments, iseve
     //console.log( rawtext );
 
     return rawtext;
+}
+
+Inquisitor.prototype.updatedialogue = function()
+{
+  if ( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).dialogueids.length > 0 )
+  {
+      inquisitor.log( 1, "Found dialogue.", "Dialogue" );
+
+      for ( var dialogueindex = 0; dialogueindex < inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).dialogueids.length; dialogueindex++ )
+      {
+          inquisitor.log( 1, "Begun dialogue.", "Dialogue" );
+          var dialogueid = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).dialogueids[dialogueindex];
+          var rawdialogue = inquisitor.world.rawdialogue[dialogueid];
+
+          var allow = true;
+          if ( rawdialogue.requiresactivation )
+          {
+              var requiredtoken = rawdialogue.requiretokens[0];
+              var requiredtokeninversion = rawdialogue.requireinversion;
+
+              inquisitor.log( 1, "Found activation requirement: " + requiredtoken, "Dialogue" );
+
+              var requiredtokenexists = ( persistentworld.tokens[requiredtoken] !== undefined && persistentworld.tokens[requiredtoken] !== null );
+              if ( requiredtokeninversion )
+              {
+                  inquisitor.log( 1, "Activation requirement inverted. ", "Dialogue" );
+                  requiredtokenexists = !requiredtokenexists;
+              }
+              allow = requiredtokenexists;
+          }
+
+          if ( allow )
+          {
+              inquisitor.log( 1, "Allowing dialogue, Length: " + rawdialogue.descriptionsegments.length, "Dialogue" );
+              inquisitor.log( 1, "Dialogue progress: " + rawdialogue.readprogress, "Dialogue" );
+
+              if ( rawdialogue.readprogress < rawdialogue.descriptionsegments.length + 1 )
+              {
+                  inquisitor.logic.indialogue = true;
+
+                  var sectionholderhtml = '';
+                  var dialoguecount = rawdialogue.descriptionsegments.length;
+                  for ( var dialogueindex = 1; dialogueindex < dialoguecount + 1; dialogueindex++ )
+                  {
+                      //sectionholderhtml += "<h3 id='section" + dialogueindex + "'" + ( rawdialogue.readprogress === dialogueindex ? " class='activesection'" : '' ) + "></h3>";
+                  }
+
+                  $( "#sectionholderrotator" ).html( sectionholderhtml );
+
+                  if ( rawdialogue.givetoken !== '' && rawdialogue.readprogress == rawdialogue.descriptionsegments.length )
+                  {
+                      persistentworld.tokens[rawdialogue.givetoken] = persistentworld.store.currentWorldLocationID;
+                  }
+
+                  if ( rawdialogue.soundurl !== '' && !inquisitor.logic.soundmuted && rawdialogue.readprogress == 0 )
+                  {
+                      var sound = new buzz.sound( rawdialogue.soundurl.trim(), {
+                          formats: ["ogg", "mp3", "wav"]
+                      } );
+                      sound.play();
+
+                      inquisitor.log( 1, "Playing sound: " + rawdialogue.soundurl, "Dialogue" );
+                  }
+
+                  if ( rawdialogue.readprogress === rawdialogue.descriptionsegments.length - 1 )
+                      tryachivement( rawdialogue.achievementname );
+
+                  var newtext = "" + inquisitor.processBodyText( rawdialogue.descriptionsegments.slice( rawdialogue.readprogress - 1, rawdialogue.readprogress ), false, false );
+                  //$( "#note" ).html( newtext );
+                  inquisitor.crossfadeelement( $( "#note" ), 750, 1000, newtext );
+                  rawdialogue.readprogress++;
+
+                  break;
+              }
+          }
+      }
+  }
 }
 
 Inquisitor.prototype.updatedescription = function( additionalsegment )
@@ -618,24 +707,36 @@ Inquisitor.prototype.findcenter = function( element )
     return offset;
 }
 
-Inquisitor.prototype.toggletimeline = function( )
+Inquisitor.prototype.drawcontent = function( )
 {
-    //viewingtimeline = !viewingtimeline;
+    inquisitor.log( 0, "inquisitor: Drawing content. Center: " + inquisitor.findcenter( '#div4' ), "Render" );
+
+    $( "#dialogue" ).hide();
+    $( "#dialoguefader1" ).hide();
+    $( "#dialoguefader2" ).hide();
+    $( "#dialoguedivider1" ).hide();
+    $( "#dialoguedivider2" ).hide();
+
+    if ( inquisitor.render.showingconsole )
+    {
+      $( "#debugboxmain" ).show();
+    }
+    else
+    {
+      $( "#debugboxmain" ).hide();
+    }
+
     $( '#core' ).show();
+    $.smoothScroll( {
+        scrollElement: $( '.content' ),
+        speed: 600,
+        easing: 'swing',
+        offset: inquisitor.findcenter( '#div4' ) + ( !( persistentworld.world.state === 'linear' || persistentworld.world.state === 'linearinterface' ) ? 100 : 50 )
+    } );
 
-    //console.log("inquisitorRender: requested rendering timeline, status: " + inquisitor.logic.viewingtimeline );
-
-    if ( inquisitor.logic.viewingtimeline )
+    if ( !inquisitor.logic.viewingtimeline )
     {
         $( '#events-content' ).hide();
-        $.smoothScroll( {
-            scrollElement: $( '.content' ),
-            speed: 600,
-            easing: 'swing',
-            offset: inquisitor.findcenter( '#notebox' ) + ( !( persistentworld.world.state === 'linear' || persistentworld.world.state === 'linearinterface' ) ? 100 : 0 )
-        } );
-
-        inquisitor.render.backgroundimageurl = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundimage;
     }
     else
     {
@@ -644,25 +745,24 @@ Inquisitor.prototype.toggletimeline = function( )
             scrollElement: $( '.content' ),
             speed: 600,
             easing: 'swing',
-            offset: inquisitor.findcenter( '#timeline' )
-        } );
-        $.smoothScroll( {
-            scrollElement: $( '.content' ),
-            speed: 600,
-            easing: 'swing',
             offset: inquisitor.findcenter( '.selected' ),
         } );
-
         inquisitor.render.backgroundimageurl = inquisitor.render.backgroundimageurltimeline;
     }
 
-    inquisitor.redrawbackground();
+    inquisitor.render.backgroundimageurl = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundimage;
+    inquisitor.render.backgroundopacity = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundopacity;
+    inquisitor.render.backgroundbrightness = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).backgroundbrightness;
 
-    $( "#dialogue" ).hide();
-    $( "#dialoguefader1" ).hide();
-    $( "#dialoguefader2" ).hide();
-    $( "#dialoguedivider1" ).hide();
-    $( "#dialoguedivider2" ).hide();
+    inquisitor.redrawbackground();
+}
+
+Inquisitor.prototype.toggletimeline = function( )
+{
+    //viewingtimeline = !viewingtimeline;
+
+    //console.log("inquisitorRender: requested rendering timeline, status: " + inquisitor.logic.viewingtimeline );
+    /**/
 
     //$( "#exitprompt" ).html( "viewingtimeline: " + viewingtimeline );
 }
@@ -755,7 +855,7 @@ Inquisitor.prototype.displayvessels = function()
     inquisitor.render.eastvessels  = 0;
     inquisitor.render.westvessels = 0;
 
-    var siblingresults = inquisitor.enumeratesiblings( persistentworld.store.currentWorldLocationID );
+    /*var siblingresults = inquisitor.enumeratesiblings( persistentworld.store.currentWorldLocationID );
     var siblings = siblingresults.siblingsfound;
 
     for ( var index in siblings )
@@ -763,23 +863,11 @@ Inquisitor.prototype.displayvessels = function()
         var siblingname = inquisitor.getlocation( siblings[index] ).name;
         //addvessel( siblings[index], siblingname, false );
         //console.log( "Inquisitor: Attempting to link to sibling, " + siblingname );
-    }
+    }*/
 
     //
 
     inquisitor.render.finaldescriptionsegments = inquisitor.getlocation(persistentworld.store.currentWorldLocationID).descriptionsegments.slice();
-
-    var children = inquisitor.enumeratechildren( persistentworld.store.currentWorldLocationID );
-    //console.log( children );
-    for ( var index in children )
-    {
-        var isobject = inquisitor.getlocation( children[index] ).isobject;
-        if ( isobject )
-        {
-            //console.log( "Inquisitor: Attempting to link to child, " + children[index] );
-            inquisitor.addvessel( children[index], inquisitor.getlocation( children[index] ).name, true, null, null, null, '#objects' );
-        }
-    }
 
     //
 
@@ -804,10 +892,10 @@ Inquisitor.prototype.displayvessels = function()
 
     //
 
-    if ( inquisitor.logic.addedlinks > 0 )
-    {
+    //if ( inquisitor.logic.addedlinks > 0 )
+    //{
         //$( "#vessels" ).append( '\n' );
-    }
+    //}
 
     //
 
@@ -823,24 +911,30 @@ Inquisitor.prototype.displayvessels = function()
         //console.log( referencename );
 
         var allowaddition = false;
-        for ( var indextwo in availableadditions )
+        /*for ( var indextwo in availableadditions )
         {
           if( index !== indextwo )
           {
             if( availableadditions[index] === availableadditions[indextwo] )
             {
-              allowaddition = true;
+              allowaddition = availableadditions[index].iswildcard;
             }
           }
-        }
+        }*/
 
         if( !allowaddition )
         {
           inquisitor.addvessel( availableadditions[index].index, availableadditions[index].title, true, availableadditions[index].initiatinglink.token,
                   availableadditions[index].initiatinglink.action, availableadditions[index].initiatinglink, null, referencetransition );
-              vesselsadded[referenceid] = ( { index: referenceid, priority: !( referencename === referencetitle ) } );
+        }
+
+        if( !availableadditions[index].iswildcard )
+        {
+          vesselsadded[referenceid] = ( { index: referenceid, priority: false } ); //!( referencename === referencetitle )
         }
     }
+
+    console.log( availableadditions );
 
     //
 
@@ -853,16 +947,13 @@ Inquisitor.prototype.displayvessels = function()
             var referencetitle = references[index].linktitle;
             var referencename = inquisitor.getlocation( references[index].index ).name;
 
-            //console.log( referencetitle );
-            //console.log( referencename );
-
             var allow = true;
             var firstaddition = vesselsadded[referenceid];
             var firstadditionfound = firstaddition !== null && firstaddition !== undefined;
             if ( firstadditionfound )
             {
-                allow = !firstaddition.priority;
-                //console.log( allow );
+                allow = firstaddition.priority;
+                console.log( allow );
             }
 
             if ( allow && !firstadditionfound && ( referencename === referencetitle ) )
@@ -870,11 +961,32 @@ Inquisitor.prototype.displayvessels = function()
                 referencetitle = inquisitor.findpreviousreferencetitle( referenceid );
             }
 
+            /*if( inquisitor.findlocationbytitle( referencetitle, persistentworld.store.currentWorldLocationID ) !== referenceid )
+            {
+              allow = false;
+            }*/
+
             if ( allow && references[index].allowmutual )
             {
                 inquisitor.addvessel( referenceid, referencetitle, true );
                 vesselsadded[referenceid] = ( { index: referenceid, priority: !( referencename === referencetitle ) } );
             }
+        }
+    }
+
+    //
+
+    var children = inquisitor.enumeratechildren( persistentworld.store.currentWorldLocationID );
+    for ( var index in children )
+    {
+        var isobject = inquisitor.getlocation( children[index] ).isobject;
+        var firstaddition = vesselsadded[children[index]];
+        var firstadditionfound = firstaddition !== null && firstaddition !== undefined;
+
+        if ( isobject && !firstadditionfound )
+        {
+            //console.log( "Inquisitor: Attempting to link to child, " + children[index] );
+            inquisitor.addvessel( children[index], inquisitor.getlocation( children[index] ).name, true, null, null, null, '#objects' );
         }
     }
 
@@ -935,15 +1047,15 @@ Inquisitor.prototype.displayvessels = function()
 
     if ( ( inquisitor.logic.eastvessels + inquisitor.logic.northvessels + inquisitor.logic.westvessels + inquisitor.logic.southvessels ) > 0 )
     {
-        $( "#diamond" ).show();
-        $( ".diamondradial" ).show();
-        //$( "#diamond" ).fadeIn( 500 );
-       // $( ".diamondradial" ).fadeIn( 500 );
+        $( "#diamond" ).hide().fadeIn( 1250 );
+        $( ".diamondradial" ).hide().fadeIn( 1250 );
+        $( "#diamondcontainer" ).hide().fadeIn( 1250 );
     }
     else
     {
-        $( "#diamond" ).hide();
-        $( ".diamondradial" ).hide();
+        $( "#diamond" ).show().fadeOut( 1250 );
+        $( ".diamondradial" ).show().fadeOut( 1250 );
+        $( "#diamondcontainer" ).show().fadeOut( 1250 );
     }
 
 }

@@ -9,7 +9,7 @@
     <script src='https://code.createjs.com/easeljs-0.8.2.min.js'></script>
 
     <script>
-        /*
+        /*					  <p id='finalfader1' class="finalfader">
             <link href='https://fonts.googleapis.com/css?family=Merriweather:300,300italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
             <link href='https://fonts.googleapis.com/css?family=Julius+Sans+One&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
             <link href='https://fonts.googleapis.com/css?family=Playfair+Display:400,400italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
@@ -62,10 +62,13 @@
     <div id="backgroundprimary" class="background"></div>
     <div id="backgroundsecondary" class="background"></div>
     <div id="backgroundvignette" class="backgroundvignette"></div>
-    <div id="backgroundbordercontainer"></div>
+    <div id="backgroundbordercontainer"><div id="backgroundborder"></div></div>
     <span id="exitprompt" class="prompt"></span>
     <span id="clearprompt" class="prompt"></span>
 		<div id='iconboxmain' class='iconbox'>
+		</div>
+		<div id='debugboxmain' class='debugbox'>
+			<p id='debug'></p>
 		</div>
     <div class="content">
         <section class="cd-horizontal-timeline" id="timeline">
@@ -101,7 +104,6 @@
 								<p id='vessels' class='destinations'></p>
 								<hr id='endofnote' class="style-two">
 						</div>
-					  <p id='finalfader1' class="finalfader">
             <div id='diamondcontainer'>
                 <div id="diamond" class='diamond'>
                     <span class="diamondradial" id="diamondbackgroundone" ></span>

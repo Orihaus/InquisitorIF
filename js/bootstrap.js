@@ -137,13 +137,14 @@ function tryupdatetime()
 
 window.onresize = function(event)
 {
-    inquisitor.toggletimeline();
+    //inquisitor.toggletimeline();
+    inquisitor.drawcontent();
 };
 
 //$( 'body' ).addClass( 'fade' );
 function clear()
 {
-    console.log( "inquisitor: clearing" );
+    //console.log( "inquisitor: clearing" );
     var center = ( $( "#core" ).height() - $( "#div4" ).height() ) / 2;
     //console.log( "inquisitor: Center: " + center );
     //$( "#div4" ).css( { "top": center } );

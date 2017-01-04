@@ -3,6 +3,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
     var result =
     {
         title: "untitled",
+        startinglocation: 0,
         regions: {},
         rawevents: [],
         rawdialogue: [],
@@ -30,6 +31,10 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
         r: '\r',
         t: '\t'
     }, text;
+
+    var inrepeatcycle = false;
+    var repeatsremaining = -1;
+    var repeatbeginindex = -1;
 
     var finished = false;
 
@@ -176,6 +181,64 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
         return processresult;
     }
 
+    var processstore = function()
+    {
+        next();
+        next();
+
+        var dowrite = true;
+        if( ch === '-' )
+        {
+          dowrite = false;
+          next();
+        }
+        else
+        {
+          previous();
+        }
+
+        var selectedvalue = "";
+
+        while ( ch === '+' || selectedvalue === '' )
+        {
+          var processedvalues = [];
+          while ( ch === ':' || processedvalues.length === 0 )
+          {
+              if( peeknextidentical(':') )
+              {
+                processedvalues.push("");
+                next();
+              }
+              else
+              {
+                next();
+
+                if( ch !== ':' && ch !== '/' && ch !== '+' && ch !== '<' )
+                {
+                  processedvalues.push( ch + processconditional( ':', '/', '+', '<' ) );
+                }
+              }
+          }
+          selectedvalue += processedvalues[Math.floor( Math.random() * processedvalues.length )];
+          console.log( processedvalues );
+        }
+
+        if ( ch === '<' )
+        {
+          var storedtokenname = processconditional( '/' );
+          storedtokenname.replace( "#REPEATINDEX", repeatsremaining );
+          persistentworld.tokens[storedtokenname] = selectedvalue;
+        }
+
+        next();
+        next();
+
+        if( dowrite )
+        {
+          return selectedvalue;
+        }
+    }
+
     var processlocationtitle = function ()
 {
         var namesegments = [];
@@ -193,12 +256,25 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
             next();
 
             namesegmentcurrentposition++;
-            if ( ch === '-' || ch === '\n' || ch === '|' || ch === '&' || ch === ':' )
+            if ( ch === '-' || ch === '\n' || ch === '&' || ch === ':' || ch === '|' || peeknextidentical('\\') )
             {
-                namesegmentid++;
-                namesegments.push( namesegmentcurrent.trim() );
-                namesegmentcurrent = "";
-                namesegmentcurrentposition = 0;
+                if( peeknextidentical('\\') )
+                {
+                  next();
+                  next();
+                  var storedtokenname = ch + processconditional( '\\' );
+                  next();
+                  next();
+                  namesegmentcurrent += ( persistentworld.tokens[storedtokenname] );
+                  console.log( namesegmentcurrent );
+                }
+                else
+                {
+                  namesegmentid++;
+                  namesegments.push( namesegmentcurrent.trim() );
+                  namesegmentcurrent = "";
+                  namesegmentcurrentposition = 0;
+                }
             }
 
             if ( ch === '&' )
@@ -207,14 +283,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                 break;
             }
 
-            /*if ( ch === '|' )
-            {
-                location.illustration += processconditional( '\n' );
-                console.log( "inquisitorParse: Found illustration: " + location.illustration );
-                break;
-            }*/
-
-            if ( ch === '\n' || ch === ':' )
+            if ( ch === '\n' || ch === ':' || ch === '|' )
             {
                 break;
             }
@@ -225,11 +294,16 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
         return namesegments;
     };
 
-    var processlocation = function ( isconcept, conceptparentstaticname, conceptparentid )
+    var processlocation = function ( isconcept, conceptparentstaticname, conceptparentid, depth )
     {
         if ( isconcept === null || isconcept === undefined )
         {
             isconcept = false;
+        }
+
+        if ( depth === null || depth === undefined )
+        {
+            depth = 0;
         }
 
         if ( ch === '~' || ch === '^' || ch === ':' || ch === '|' )
@@ -247,7 +321,14 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
             location.linkoverrides = {};
             location.linkadditions = {};
             location.id = result.rawlocations.length;
-            location.isobject = ( ch === '^' );
+
+            if( ch === '^' )
+            {
+                location.isobject = true;
+                location.parentdirection = Math.floor( Math.random() * 4 ) + 1;
+                location.linktitleinparent = "";
+            }
+
             location.isconcept = isconcept;
             location.isentity = false;
             location.displayparent = location.isobject;
@@ -256,9 +337,13 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
             location.hidden = false;
             location.inlinelinks = [];
             location.backgroundimage = '';
+            location.backgroundopacity = "0.3";
+            location.backgroundbrightness = "0.5";
             location.hasconcepts = false;
             location.state = 'stateless';
-            location.color = "";
+            location.color = "#eeeeee";
+            location.maxdepth = -1;
+            location.depth = depth;
 
             //console.log( "inquisitorParse: Processing " + ( location.isobject ? "Object" : "Location" ) );
 
@@ -272,6 +357,24 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
             {
                 location.isentity = true;
                 //console.log( "inquisitorParse: Found Entity" );
+                next();
+            }
+            else if ( ch === '/' )
+            {
+                var savedat = at - 2, secondarysavedat = -1;
+                next();
+                location.maxdepth = ch + processconditional( '/' );
+
+                if( depth < location.maxdepth - 1 )
+                {
+                  secondarysavedat = at;
+                  at = savedat;
+                  next();
+                  processlocation( false, null, null, depth + 1 );
+                  location.id = result.rawlocations.length;
+                  at = secondarysavedat;
+                }
+
                 next();
             }
 
@@ -312,14 +415,22 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
             //
 
-            if ( ch === ':' )
+            if( ch === ':' || peeknext( ':' ) )
             {
-                location.staticname = processconditional( '\n' );
-                selectedname.push( location.staticname );
-                //console.log( "inquisitorParse: Found static name: " + staticname );
-            }
-            else
-            {
+                var selectedstaticname = "";
+                while ( ch === ':' )
+                {
+                    var processedstaticnames = [];
+                    while ( peeknext( '|' ) || ch === '|' || processedstaticnames.length === 0 )
+                    {
+                        next();
+                        processedstaticnames.push( ch + processconditional( '\n', '|', ':' ) );
+                    }
+
+                    selectedstaticname += processedstaticnames[Math.floor( Math.random() * processedstaticnames.length )];
+                }
+
+                selectedname.push( selectedstaticname );
                 location.staticname = selectedname[selectedname.length - 1];
             }
 
@@ -355,16 +466,37 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                     //console.log( "inquisitorParse: Found state: " + state );
                     location.state = state;
                 }
+                else if ( peeknext( '>', '^' ) )
+                {
+                    next();
+                    var linktitleinparent = processconditional( '\n' ).trim();
+                    //console.log( "inquisitorParse: Found background color: " + color );
+                    location.linktitleinparent = linktitleinparent;
+                }
                 else if ( peeknext( '>', '#' ) )
                 {
                     var color = processconditional( '\n' ).trim();
-                    console.log( "inquisitorParse: Found background color: " + color );
+                    //console.log( "inquisitorParse: Found background color: " + color );
                     location.color = color;
                 }
                 else
                 {
-                    var backgroundimage = processconditional( '\n' );
+                    var backgroundimage = processconditional( '\n', ':' ).trim();
                     //console.log( "inquisitorParse: Found background image: " + backgroundimage );
+
+                    if( ch === ':' )
+                    {
+                      next();
+                      location.backgroundopacity = ch + processconditional( '\n', ':' ).trim();
+                      console.log( "inquisitorParse: Found background opacity: " + location.backgroundopacity );
+                    }
+
+                    if( ch === ':' )
+                    {
+                      location.backgroundbrightness = processconditional( '\n' ).trim();
+                      console.log( "inquisitorParse: Found background brightness: " + location.backgroundbrightness );
+                    }
+
                     location.backgroundimage = backgroundimage;
                 }
             }
@@ -377,7 +509,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
             if ( !bail )
             {
-                while ( ch !== '~' && at < text.length && ch !== '#' && ch !== '^' && ch !== '/' && ch !== '>' && ch !== '`' && !( peeknextidentical( '|' ) && isconcept ) )
+                while ( ch !== '~' && at < text.length && ch !== '#' && ch !== '^' && ch !== '>' && ch !== '<' && !( ch === '/' ) && ch !== '`' && !( peeknextidentical( '|' ) && isconcept ) )
                 {
                     /*if ( ch === '[' )
                     {
@@ -475,9 +607,26 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                         //console.log( "inquisitorParse: Ending NPC conception." );
                     }
+                    else if ( peeknext( '-', '/' ) )
+                    {
+                        currentdescriptionsegment += processstore();
+                    }
+                    else if ( peeknextidentical( "\\" ) )
+                    {
+                        next();
+                        next();
+
+                        var storedtokenname = ch + processconditional( '\\' );
+                        next();
+                        next();
+
+                        currentdescriptionsegment += persistentworld.tokens[storedtokenname];
+                        //var olddescriptionsegment = { text: currentdescriptionsegment, requiresactivation: false, active: true, postactivationtext: '', islink: false }
+                        //location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = "";
+                    }
                     else if ( ch === '"' )
                     {
-                        console.log( "inquisitorParse: Reading quote as raw." );
+                        //console.log( "inquisitorParse: Reading quote as raw." );
 
                         //if ( !checkempty( currentdescriptionsegment.trim() ) )
                         //{
@@ -495,7 +644,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                         var olddescriptionsegment = { text: currentdescriptionsegment + '"', requiresactivation: false, active: true, postactivationtext: '', islink: false }
                         location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = "";
 
-                        console.log( "inquisitorParse: Ending quote." );
+                        //console.log( "inquisitorParse: Ending quote." );
 
                         next();
                     }
@@ -504,7 +653,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                         var islinklocal = ( ch === '[' );
                         var linkidentifier = !islinklocal ? '}' : ']';
                         var additionprocessingindex = 0;
-                        var targetaddition = { target: '', title: '', transition: '', conditional: '', hasconditional: false, exclusionconditional: false, token: '', action: '', displayaschild: false, linkdirection: 0, resetonlink: false, force: ch === '{', allowmutual: !( ch === '{' ) }
+                        var targetaddition = { target: '', title: '', transition: '', conditional: '', iswildcard: false, hasconditional: false, exclusionconditional: false, token: '', action: '', displayaschild: false, linkdirection: 0, resetonlink: false, force: ch === '{', allowmutual: !( ch === '{' ) }
 
                         next();
                         if ( ch === "^" )
@@ -512,30 +661,68 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                             targetaddition.displayaschild = true;
                             next();
                         }
+                        else if ( ch === "*" )
+                        {
+                            targetaddition.iswildcard = true;
+                            next();
+                        }
                         previous();
 
-                        var target = processconditional( ':', '@', '&' );
+                        var target = '';
                         var multipletargets = false;
+                        var targets = [];
 
-                        if ( ch === '&' )
+                        var targetprocessingindex = 0;
+                        while ( ch !== ':' && ch !== '@' )
                         {
-                            var targets = [];
-                            multipletargets = true;
-
-                            targets.push( target );
-
-                            while ( ch === '&' )
+                            if ( targetprocessingindex > 0 )
                             {
-                                next();
-                                targets.push( ch + processconditional( ':', '@', '&' ) );
-                                //console.log( "inquisitorParse: Found location target number: " + targets.length + ". Title: " + targets[targets.length-1] );
-                            }
+                                if( peeknextidentical('\\') )
+                                {
+                                  next();
+                                  next();
+                                  var storedtokenname = ch + processconditional( '\\' );
+                                  next();
+                                  target += ( persistentworld.tokens[storedtokenname] );
+                                }
+                                else
+                                {
+                                  target += ch;
+                                }
 
-                            target = targets[Math.floor( Math.random() * targets.length )];
+                                if ( ch === '&' )
+                                {
+                                    multipletargets = true;
+
+                                    targets.push( target );
+                                }
+                            }
+                            next();
+                            targetprocessingindex++;
+                        }
+
+                        if( multipletargets )
+                        {
+                          target = targets[Math.floor( Math.random() * targets.length )];
                         }
 
                         targetaddition.target += target;//.trim();
-                        targetaddition.title += processconditional( linkidentifier, '?', '+', '!', '@', '/', '<', '(' );//.trim();
+
+                        var titleprocessingindex = 0;
+                        while ( ch !== '?' && ch !== '+' && ch !== '!' && ch !== linkidentifier && ch !== '@' && ch !== '/' && ch !== '<' && ch !== '(' )
+                        {
+                            if ( titleprocessingindex > 0 )
+                            {
+                                targetaddition.title += ch;
+
+                                if( peeknextidentical('\\') )
+                                {
+                                  targetaddition.title += processstore();
+                                }
+                            }
+                            next();
+                            titleprocessingindex++;
+                        }
 
                         if ( targetaddition.title === '' )
                         {
@@ -620,7 +807,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                             next();
                         }
 
-                        location.linkadditions[targetaddition.target] = targetaddition;
+                        location.linkadditions[targetaddition.iswildcard ? Object.keys(location.linkadditions).length : targetaddition.target] = targetaddition;
                         //console.log( "inquisitorParse: Found target addition. Title: " + targetaddition.title + ". Target: " + targetaddition.target );
                         next();
                     }
@@ -783,7 +970,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                 //console.log( "inquisitorParse: Connecting inline and offline link to destination: " + location.inlinelinks[inlineindex].destination );
 
-                for ( var overrideindex in location.linkoverrides )
+                /*for ( var overrideindex in location.linkoverrides )
                 {
                     if( location.linkoverrides[overrideindex].target === location.inlinelinks[inlineindex].destination )
                     {
@@ -793,7 +980,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                         foundreference = true;
                     }
-                }
+                }*/
 
                 if( !foundreference )
                 {
@@ -805,7 +992,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                             descriptionsegmenttoupdate.referencedlink = overrideindex;
                             descriptionsegmenttoupdate.referencedlinkisadditional = true;
 
-                            foundreference = true;
+                            foundreference = location.linkadditions[overrideindex].iswildcard;
                         }
                     }
                 }
@@ -950,7 +1137,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                 }
                 else if ( ch === '"' )
                 {
-                    console.log( "inquisitorParse: Reading quote as raw." );
+                    //console.log( "inquisitorParse: Reading quote as raw." );
 
                     next();
 
@@ -958,7 +1145,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                     event.text += '"' + currentdescriptionsegment + '"';
 
-                    console.log( "inquisitorParse: Ending quote." );
+                    //console.log( "inquisitorParse: Ending quote." );
 
                     next();
                 }
@@ -1087,8 +1274,8 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
         while ( !isterminated )
         {
-            commenttext += processconditional( '/' );
-            isterminated = peeknextidentical( '/' );
+            commenttext += processconditional( '*' );
+            isterminated = peeknext( '*', '/' );
             next();
         }
 
@@ -1183,9 +1370,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
         icon.url = ch + processconditional( "?" );
         icon.condition = processconditional( "\n" ).trim();
 
-        console.log( "inquisitorParse: icon found:" );
-        console.log( icon );
-
+        inquisitor.log( 0, "Icon found: " + icon.url, "Parse" );
         result.iconbuffer.push( icon );
 
         return icon;
@@ -1200,15 +1385,66 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
         return result.title;
     }
 
+    var processrepeat = function ()
+    {
+        if( !inrepeatcycle )
+        {
+          next();
+          inrepeatcycle = true;
+          repeatsremaining = Number( processconditional( "\n" ).trim() );
+          previous();
+          repeatbeginindex = at;
+
+          console.log( "inquisitorParse: Starting repeat cycle. Repeat count: " + repeatsremaining );
+        }
+        else
+        {
+          if( repeatsremaining > 0 )
+          {
+            console.log( "inquisitorParse: Continuing repeat cycle" );
+
+            repeatsremaining--;
+            at = repeatbeginindex;
+
+            next();
+            next();
+          }
+          else
+          {
+            inrepeatcycle = false;
+            console.log( "inquisitorParse: Ending repeat cycle" );
+
+            next();
+            next();
+          }
+        }
+
+        next();
+        next();
+
+        return inrepeatcycle;
+    }
+
     var value = function ()
     {
         //console.log( "inquisitorParse: Finding object to process" );
 
         switch ( ch )
         {
+            case '<':
+                {
+                    if ( peeknextidentical( '<' ) )
+                    {
+                        return processrepeat();
+                    }
+                }
             case '/':
                 {
                     if ( peeknextidentical( '/' ) )
+                    {
+                        return processstore();
+                    }
+                    else if ( peeknext( '/', '*' ) )
                     {
                         return comment();
                     }
@@ -1217,8 +1453,20 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                         return dialogue();
                     }
                 }
+
             case '~':
-                return processlocation();
+                {
+                    if ( peeknext( '~', '|' ) )
+                    {
+                        result.startinglocation = result.rawlocations.length;
+                        next();
+                        return processlocation();
+                    }
+                    else
+                    {
+                        return processlocation();
+                    }
+                }
             case '^':
                 {
                     if ( peeknextidentical( '^' ) )
@@ -1318,6 +1566,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
             //
 
             callback( result );
+            console.log( result );
         }
     }
 

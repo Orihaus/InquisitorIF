@@ -166,7 +166,7 @@ function trybegintimeline()
 	    //var textbodylocation = findcenter( '#' + eventidcorrected
 	    //console.log( event.attr( "data" ) );
 	    inquisitor.render.backgroundimageurltimeline = inquisitor.render.backgroundimageurl = event.attr( "data" );
-	    inquisitor.redrawbackground();
+	    //inquisitor.redrawbackground();
 
         $.smoothScroll( {
             scrollElement: $( '.content' ),

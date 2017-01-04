@@ -23,7 +23,24 @@ body
     -webkit-font-smoothing: antialiased;
     font-size:16px; font-family: 'Cardo', serif; color:#adadad; /*letter-spacing:0.042em;*/
     font-weight:normal; line-height: 1.5em;/*line-height: 22.4px;*/
-          background-color: #323232;
+          background-color: #242424;
+}
+
+.debugbox
+{
+  position: fixed;
+  margin-top: 85px;
+  left:50px;
+  pointer-events: all !important;
+}
+
+#debug
+{
+  font-size: 11px;
+  height:100px;
+  width: 350px;
+  overflow: auto;
+  pointer-events: all !important;
 }
 
 .iconbox
@@ -75,9 +92,10 @@ body
 #diamondcontainer
 {
         margin: 0 auto;
-    display: table;
+    display: table !important;
     padding-bottom:100px;
     pointer-events: none;
+    z-index: 9999 !important;
 }
 .diamondradial
 {
@@ -315,7 +333,7 @@ hr.diamondstyle
   position: fixed;
   top: 0;
   left: 0;
-    z-index: -1;
+    z-index: -2;
 
     display: block;
 
@@ -336,7 +354,7 @@ hr.diamondstyle
 
     margin:0px 0px;
 
-    opacity: 0.75;
+    opacity: 0.7;
     -webkit-backface-visibility: hidden;
     pointer-events: none;
 }
@@ -366,13 +384,13 @@ hr.diamondstyle
   -o-background-size: cover;
   background-size: cover;
 
-    -webkit-filter: blur(4px) brightness(1.0) saturate(0.75);
-    -moz-filter: blur(4px) brightness(1.0) saturate(0.75);
-    -o-filter: blur(4px) brightness(1.0) saturate(0.75);
-    -ms-filter: blur(4px) brightness(1.0) saturate(0.75);
-    filter: blur(4px) brightness(1.0) saturate(0.75);
+    -webkit-filter: blur(4px) brightness(0.875) saturate(0.75);
+    -moz-filter: blur(4px) brightness(0.875) saturate(0.75);
+    -o-filter: blur(4px) brightness(0.875) saturate(0.75);
+    -ms-filter: blur(4px) brightness(0.875) saturate(0.75);
+    filter: blur(4px) brightness(0.875) saturate(0.75);
 
-    opacity: 0.333;
+    opacity: 0.7;
 
     margin:0px auto;
 
@@ -397,11 +415,11 @@ hr.diamondstyle
   position: fixed;
   top: 25.0%;
   left: 0;
-    z-index: -2;
+    z-index: -3;
 
     display: block;
 
-    background:url('../img/silver/silver_factory_01.png');
+    background-color: rgba( 1.0, 1.0, 1.0, 0.333 );
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -409,13 +427,7 @@ hr.diamondstyle
 
   -webkit-mix-blend-mode: screen;
   mix-blend-mode: screen;
-  opacity: 0.5;
-
-    -webkit-filter: blur(1.5px) brightness(0.75) saturate(1.0);
-    -moz-filter:blur(1.5px) brightness(0.75) saturate(1.0);
-    -o-filter:blur(1.5px) brightness(0.75) saturate(1.0);
-    -ms-filter:blur(1.5px) brightness(0.75) saturate(1.0);
-    filter:blur(1.5px) brightness(0.75) saturate(1.0);
+  opacity: 0.75;
 
     margin:0px 0px;
     -webkit-backface-visibility: hidden;
@@ -466,14 +478,24 @@ hr.diamondstyle
 {
     content: "";
     position: fixed;
-    width: 96%;
-    height: 92.5%;
-    margin: 2% 2%;
-    opacity: 0.175;
-    border:thin solid #aaa;
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 25px;
     pointer-events: none;
 }
 
+#backgroundborder
+{
+    content: "";
+    position: relative;
+    width: 100%;
+    height: 100%;
+    opacity: 0.175;
+    border-top:thin solid #666;
+    border-bottom:thin solid #666;
+    pointer-events: none;
+}
 
 #backgroundborders
 {
@@ -571,23 +593,88 @@ hr.diamondstyle
   transform: translateX( 0px );
 }
 
-#note
+.headerbox
 {
-  /*padding-left:15px;
-  padding-right:15px;
-  padding-top:5px;
-  padding-bottom:0px;*/
-  padding:20px 40px;
-  margin-left:110px;
-  margin-right:110px;
-  text-align: justify !important;
-  font-size: 16px;
-  white-space: pre-wrap;
-  overflow-y:auto;
-  max-height: 400px;
-  border-left: medium double #a69471;
-  overflow-x:hidden;
--webkit-transform: translate3d(0,0,0);
+  width: auto;
+  width:auto;
+  position: relative;
+  margin: 20px auto;
+  display: table;
+  padding: 20px 40px 30px 40px;
+  border: 1px solid rgba( 255, 255, 255, 0.075 );
+  border-top: 0px;
+  border-bottom: 0px;
+}
+.headerbox.linearlayout
+{
+  height: 50px;
+  display:table;
+  text-align:left;
+  top: 50%;
+  transform: translateY(0%);
+}
+
+h1
+{
+  font-size:2.725em;
+  line-height: 0.875em;
+  width:auto;
+  position: relative;
+  margin: 0 auto;
+  display: table;
+  padding: 0 -40px;
+  color:#d9c293;
+  text-align: center;
+  padding-bottom: 0px;
+  text-transform: uppercase;
+  font-family: 'Cinzel', serif;
+  font-weight:200;
+  letter-spacing: 0.6em;
+  z-index: 50;
+}
+h1::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  display: inline-block;
+  height: 1em;
+width: 96%;
+left: 2%;
+right: 2%;
+    border-bottom: 0px solid #222;
+  margin-top: 10px;
+}
+h1.linearlayout
+{
+    color:#e4e4e4;
+    text-align: center;
+    font-size:2.5em;
+}
+h1.linearlayout::after
+{
+}
+h1.linearlayout::before
+{
+    transform:skewX(0deg);
+    background-color: #aaa;
+    opacity:0.0;
+}
+
+h4
+{
+    font-size:12px;
+    text-align: center;
+    margin-top:0px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-family: 'Cinzel', sans-serif;
+    font-weight:400;
+    white-space: pre-wrap;
+    letter-spacing: 0.7em;
+}
+h4.linearlayout
+{
+    text-align: center;
 }
 
 #transitiontext
@@ -606,16 +693,41 @@ hr.diamondstyle
   color: #eaeaea;
 }
 
+#note
+{
+  /*padding-left:15px;
+  padding-right:15px;
+  padding-top:5px;
+  padding-bottom:0px;*/
+  font-family: "Cardo";
+  padding:20px 40px;
+  margin-left:50px;
+  margin-right:50px;
+  text-align: justify !important;
+  font-size: 17.25px;
+  white-space: pre-wrap;
+  overflow-y:auto;
+  max-height: 400px;
+  font-weight: 300;
+  font-style: normal;
+  line-height: 1.8em;
+  letter-spacing: -.003em;
+  border: 1px solid rgba( 255, 255, 255, 0.075 );
+  border-left: 0px;
+  border-right: 0px;
+  overflow-x:hidden;
+-webkit-transform: translate3d(0,0,0);
+}
+
 #note.linearlayout
 {
-  font-family: 'Cardo', serif;
-  font-size: 17px;
-  margin-left:20px;
-  margin-right:20px;
-  border-left: 1px solid rgba( 64, 64, 64, 0.5 );
+  margin-left:40px;
+  margin-right:40px;
+  border: 1px solid rgba( 255, 255, 255, 0.075 );
+  border-top: 0px;
+  border-bottom: 0px;
+  border-right: 0px;
   margin-bottom:20px;
-  padding:40px;
-  line-height: 1.7em;
   max-width: 1100px;
   max-height: 700px;
   height: 100%;
@@ -631,9 +743,9 @@ hr.diamondstyle
   font-size: 17px;
   margin-left:20px;
   margin-right:20px;
-  border-left: 0px solid rgba( 64, 64, 64, 0.5 );
-  border-bottom: 1px solid rgba( 64, 64, 64, 0.5 );
-  border-top: 1px solid rgba( 64, 64, 64, 0.5 );
+  border: 1px solid rgba( 255, 255, 255, 0.075 );
+  border-left: 0px;
+  border-right: 0px;
   margin-bottom:20px;
   padding:40px;
   line-height: 1.7em;
@@ -644,24 +756,6 @@ hr.diamondstyle
   -moz-transition:width 3000ms ease-in-out, height 3000ms ease-in-out;
   -o-transition:width 3000ms ease-in-out, height 3000ms ease-in-out;
   transition:width 3000ms ease-in-out, height 3000ms ease-in-out;
-}
-
-.headerbox
-{
-  width: auto;
-  width:auto;
-  position: relative;
-  margin: 0 auto;
-  display: table;
-  padding: 20px 0px 40px 0px;
-}
-.headerbox.linearlayout
-{
-  height: 50px;
-  display:table;
-  text-align:left;
-  top: 50%;
-  transform: translateY(0%);
 }
 
 #noteline
@@ -852,7 +946,7 @@ hr.style-two
     color: #333;
     text-align: center;
     width: 5%;
-    margin-top:5px;
+    margin-top:-10px;
     margin-bottom:30px;
     margin-left: 47.5%;
     margin-right: 100%;
@@ -928,67 +1022,6 @@ h5
     vertical-align: bottom;
 }
 
-h1
-{
-    font-size:2.25em;
-  width:auto;
-  position: relative;
-margin: 0 auto;
-display: table;
-padding: 0 -40px;
-    color:#d9c293;
-    text-align: center;
-    padding-bottom: 0px;
-    text-transform: uppercase;
-    font-family: 'Cinzel', serif;
-    font-weight:200;
-    letter-spacing: 0.25em;
-    line-height:0.97em;
-    z-index: 50;
-
-}
-h1::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  display: inline-block;
-  height: 1em;
-width: 96%;
-left: 2%;
-right: 2%;
-    border-bottom: 0px solid #222;
-  margin-top: 10px;
-}
-/*h1::before {
-  content: '';
-    width: 110%;
-    height: 50px;
-    top: -10px;
-    left: -5%;
-  position: absolute;
-margin: 0 auto;
-display: table;
-padding: 10px 10px;
-    background-color: #cacaca;
-    transform:skewX(-15deg);
-    z-index: -1;
-}*/
-
-h1.linearlayout
-{
-    color:#e2e2e2;
-    text-align: left;
-    margin-left:0px;
-    font-size:2.25em;
-}
-h1.linearlayout::after {
-}
-h1.linearlayout::before {
-    transform:skewX(0deg);
-    background-color: #aaa;
-    opacity:0.0;
-}
-
 h3
 {
     width: 9px;
@@ -1017,27 +1050,6 @@ h3
 h3:hover
 {
     border: 3px solid rgba( 244, 244, 244, 0.5 );
-}
-
-h4
-{
-    font-size:medium;
-    text-align: center;
-    margin-top:0px;
-    margin-bottom: 15px;
-    text-transform: uppercase;
-    font-family: 'Cinzel', sans-serif;
-    font-weight:400;
-    letter-spacing: 3px;
-    white-space: pre-wrap;
-    line-height: 0.97em;
-}
-h4.linearlayout
-{
-    margin-bottom: 6px;
-    letter-spacing: initial;
-    text-align: left;
-    margin-left:0px;
 }
 
 h1::first-letter {
@@ -1202,7 +1214,7 @@ notetitle
 
 first {
     font-family: 'Playfair Display SC', serif;
-    font-size:108%;
+    font-size:105%;
     font-weight:400;
     color: #ccb68b;
 }
@@ -1220,7 +1232,7 @@ history {
     border-bottom: 0px solid #333;
     display: block;
         width: 300px;
-    margin: 0 auto;
+    margin: 0px auto 20px auto;
 }
 #vessels
 {
@@ -1229,7 +1241,7 @@ history {
     border-bottom: 0px solid #333;
     display: block;
         width: 300px;
-    margin: 0 auto;
+    margin: 10px auto;
 }
 
 vessel
@@ -1501,22 +1513,22 @@ p.destinations
 
 .continueprompt
 {
-    position:absolute;
+    position:relative;
     text-align:center;
     font-style: italic;
     cursor:pointer;
-    color:#222;
+    color:#eee;
     margin-bottom: 20px;
+    margin-top: 30px;
     font-family: 'Cinzel Decorative', sans-serif;
-    font-size:100%;
-    letter-spacing: 0.05em;
+    font-size:92.5%;
+    letter-spacing: 0.175em;
     font-weight:bold;
     bottom: 35px;
-    right: 50%;
 }
 
 div.main p::after { content:"";}
-p:not(.history):not(.destinations):not(.dialogue):not(.excludefirst):not(.continueprompt):not(.direction):not(#lyscounter):not(#transitiontext):not(.icon)::first-letter {
+p:not(.history):not(.destinations):not(.dialogue):not(.excludefirst):not(.continueprompt):not(.direction):not(#lyscounter):not(#transitiontext):not(.icon):not(#debug)::first-letter {
     float:left;
     font-family: 'Cinzel Decorative', sans-serif;
     font-size:450%;
