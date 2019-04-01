@@ -1,6 +1,14 @@
 >?inquisitortutorial2.0
 >/img/item/TBIM_ITEM_Lantern_512.png?IconExampleToken
 
+(
+	ambient_01
+	>snd/atmos/toburnatmos_v01-TRACK02
+	>1.0
+	>0.9-0.9
+	?PlayingAmbient
+)
+
 ~Introduction - Tutorial
 >?linearinterface
 >silver/silver_rembrandt_03b.png:0.5
@@ -160,6 +168,23 @@ All this stuff is work in progress and is liable to change.
 
 [Put It All Together:Putting It All Together@North]
 [Timeline:Access the Timeline@East]
+[Ambient Audio:Setting up Ambient Audio@East]
+
+~Inquisitor - Advanced and Experimental - Ambient Audio
+There are two kinds of audio that can be triggered in Inquisitor. Ambient audio is referenced outside of location definitions, in a global context. An example of an ambient audio definition:
+
+"(
+	ambient_01 								- Title
+	~50										- Set to Loop at Time
+	>snd/atmos/toburnatmos_v01-TRACK02  	        - Filename
+	>1.0									        - Probablity
+	>0.0-0.5									- Start and End Volume (start only applicable without loop)
+	?HasMynometerActivatedKey                       		- Trigger Token
+)"
+
+|Play?:-+PlayingAmbient!PlayingAmbient|
+
+[Advanced and Experimental:Return to Advanced and Experimental@West]
 
 >|_progress>10:travel.Director|
 ~Inquisitor - Advanced and Experimental - Director

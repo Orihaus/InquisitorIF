@@ -1434,7 +1434,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
           usefirstbuffer: true,
           firstbuffer: {},
           secondbuffer: {},
-          startvolume: 0.2,
+          startvolume: 1.0,
           endvolume: 0.5,
           targetvolume: 0.5,
           loop: false,
@@ -1478,6 +1478,8 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
         console.log( "inquisitorParse: Audio found: " + audio.name 
             + ". URL: "                               + audio.url 
+            + ". Start Volume: "                               + audio.startvolume 
+            + ". End Volume: "                               + audio.endvolume 
             + ". Probablility: "                      + audio.probablility );
 
         while( ch === '?' ||  ch === '!' )

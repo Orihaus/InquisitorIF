@@ -211,7 +211,7 @@ Inquisitor.prototype.updateambientaudio = function ()
             {
                 for ( var ruleid in inquisitor.world.audios[id].rules )
                 {
-                   // inquisitor.log( 0, "Testing Audio Rule: " + inquisitor.world.audios[id].rules[ruleid].token );
+                    inquisitor.log( 0, "Testing Audio Rule: " + inquisitor.world.audios[id].rules[ruleid].token );
                     var requiredtoken = inquisitor.world.audios[id].rules[ruleid].token;
                     var allowrule = 
                         ( persistentworld.tokens[requiredtoken] !== undefined 
@@ -253,7 +253,7 @@ Inquisitor.prototype.updateambientaudio = function ()
 
                 inquisitor.log( 0, "Playing Audio: " + inquisitor.world.audios[id].name );
             }
-            //inquisitor.log( 0, "Audio: " + inquisitor.world.audios[id].name );
+           // inquisitor.log( 0, "Audio: " + inquisitor.world.audios[id].name );
 
             //
 
@@ -261,10 +261,19 @@ Inquisitor.prototype.updateambientaudio = function ()
             {
                 if( !inquisitor.world.audios[id].loop )
                 {
-                    inquisitor.world.audios[id].targetvolume = 
-                    lerp( inquisitor.world.audios[id].startvolume,
-                          inquisitor.world.audios[id].endvolume,
-                          inquisitor.world.audios[id].firstbuffer.getPercent() / 100.0 );
+                    if( inquisitor.world.audios[id].firstbuffer.getPercent() > 0 )
+                    {
+                        inquisitor.world.audios[id].targetvolume = 
+                            lerp( inquisitor.world.audios[id].startvolume,
+                                inquisitor.world.audios[id].endvolume,
+                                inquisitor.world.audios[id].firstbuffer.getPercent() / 100.0 );
+                    }
+                    else
+                    {
+                        inquisitor.world.audios[id].targetvolume = inquisitor.world.audios[id].startvolume;
+                    }
+
+                         //inquisitor.log( 0, inquisitor.world.audios[id].targetvolume );
 
                     inquisitor.world.audios[id].firstbuffer.setVolume( inquisitor.world.audios[id].targetvolume );
                 }
