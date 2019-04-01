@@ -8,7 +8,7 @@
  // http://jaysalvat.com/
  // ----------------------------------------------------------------------------
 
-(function(context, factory) {
+/*(function(context, factory) {
     "use strict";
     if (typeof module !== "undefined" && module.exports) {
         module.exports = factory();
@@ -18,7 +18,7 @@
         context.buzz = factory();
     }
 })(this, function() {
-    "use strict";
+    "use strict";*/
     var AudioContext = window.AudioContext || window.webkitAudioContext;
     var buzz = {
         defaults: {
@@ -726,5 +726,5 @@
             return Math.round(total / 100 * percent * r) / r;
         }
     };
-    return buzz;
-});
+    //return buzz;
+//});

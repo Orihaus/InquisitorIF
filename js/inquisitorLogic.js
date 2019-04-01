@@ -1,7 +1,8 @@
 Inquisitor.prototype.calculatereadingtime = function( texttoread )
 {
     var CPM = 1150.0;
-    var characterlength = texttoread.length.toFixed();
+    var texttoreadnowhitespace = texttoread.trim();
+    var characterlength = texttoreadnowhitespace.length.toFixed();
 
     return Math.floor( ( characterlength / CPM ) * 600.0 ) * 100;
 }
@@ -9,15 +10,15 @@ Inquisitor.prototype.calculatereadingtime = function( texttoread )
 Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocationindex, initiatinglink, forcelink, ignorestate )
 {
     var result = {};
-    result.mutual = false;
-    result.mutualdirection = -1;
+    //result.mutual = false;
+    //result.mutualdirection = -1;
     result.title = "";
     result.combinationconditional = false;
     result.success = false;
 
-    var mutuallink = inquisitor.tryfindmutuallink( targetlocationindex, inquisitor.world.rawlocations[startlocationindex] );
-    var allowmutual = true;
-    if ( mutuallink !== undefined && mutuallink !== null )
+    //var mutuallink = inquisitor.tryfindmutuallink( targetlocationindex, inquisitor.world.rawlocations[startlocationindex] );
+    //var allowmutual = true;
+    /*if ( mutuallink !== undefined && mutuallink !== null )
     {
         if ( initiatinglink !== undefined && initiatinglink !== null )
         {
@@ -35,7 +36,7 @@ Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocation
     if( inquisitor.world.rawlocations[targetlocationindex].parentid == startlocationindex )
     {
       result.mutualdirection = inquisitor.world.rawlocations[targetlocationindex].parentdirection;
-    }
+    }*/
 
     if ( initiatinglink !== undefined && initiatinglink !== null )
     {
@@ -54,7 +55,7 @@ Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocation
                     return result;
                 }
             }
-            if ( hastoken && link.exclusionconditional )
+            if ( hastoken && initiatinglink.exclusionconditional )
             {
                 console.log( "inquisitor: Exclusion Condition: " + initiatinglink.conditional + ". Met" );
                 return result;
@@ -63,15 +64,20 @@ Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocation
 
         result.title = initiatinglink.title;
     }
-    else if ( !forcelink && !result.mutual )
+    else if ( !forcelink ) // && !result.mutual
     {
         console.log( "inquisitor: Link not requested" );
         return result;
     }
 
-    if ( inquisitor.world.rawlocations[targetlocationindex].hidden )
+    if( persistentworld.world.locationhidden[targetlocationindex] === undefined 
+     || persistentworld.world.locationhidden[targetlocationindex] === null )
     {
-        console.log( "inquisitor: " + id + " is hidden." );
+        persistentworld.world.locationhidden[targetlocationindex] = false;
+    }
+    else if ( persistentworld.world.locationhidden[targetlocationindex] === true )
+    {
+        console.log( "inquisitor: Link hidden." );
         return result;
     }
 
@@ -100,15 +106,21 @@ Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocation
 }
 
 
-Inquisitor.prototype.testactivationrequirements = function( index, currentdescriptionsegment )
+Inquisitor.prototype.testactivationrequirements = function( requiredtokens )
 {
+    inquisitor.log( 0, "Testing activation results." );
+
     var allow = false;
-    var requiredtokens = currentdescriptionsegment[index].requiretokens;
     for ( var tokenindex = 0; tokenindex < requiredtokens.length; tokenindex++ )
     {
-        var requiredtoken = requiredtokens[tokenindex];
-        var requiredtokeninversion = currentdescriptionsegment[index].requireinversion;
-        var requiredtokenexists = ( persistentworld.tokens[requiredtoken] !== undefined && persistentworld.tokens[requiredtoken] !== null );
+        inquisitor.log( 0, "Testing for required token: " + requiredtokens[tokenindex].token );
+
+        var requiredtoken = requiredtokens[tokenindex].token;
+        var requiredtokeninversion = requiredtokens[tokenindex].requireinversion;
+        var requiredtokenexists = 
+            ( persistentworld.tokens[requiredtoken] !== undefined 
+           && persistentworld.tokens[requiredtoken] !== null );
+
         if ( requiredtokeninversion )
         {
             requiredtokenexists = !requiredtokenexists;
@@ -187,7 +199,7 @@ Inquisitor.prototype.updatedirector = function()
   }
 }
 
-Inquisitor.prototype.updatetime = function( forcetraverse )
+Inquisitor.prototype.updatetime = function( forcetraverse, noprogress )
 {
     persistentworld.tokens["_progress"] = persistentworld.lys.vialcount;
     persistentworld.tokens["_random"]   = Math.floor( Math.random() * 100 );
@@ -201,13 +213,17 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
             : inquisitor.logic.currentlocationprogress;
 
     //
+    
+    if( !noprogress )
+    {
+        persistentworld.time.globaltime++;
+    }
 
-    persistentworld.time.globaltime++;
     if ( persistentworld.time.locationtime[persistentworld.store.currentWorldLocationID] === undefined || persistentworld.time.locationtime[persistentworld.store.currentWorldLocationID] === null )
     {
         persistentworld.time.locationtime[persistentworld.store.currentWorldLocationID] = 0;
     }
-    else
+    else if( !noprogress )
     {
         persistentworld.time.locationtime[persistentworld.store.currentWorldLocationID]++;
     }
@@ -235,76 +251,60 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
     console.log( "inquisitor: Event Prompt Clicked." );
     redraw();*/
 
-    var loca = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments[inquisitor.logic.currentlocationprogress];
-    var locaold = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments[inquisitor.logic.currentlocationprogress - 1];
-    var readtime = 1500;
-    var previousreadtime = 5000;
-
-    if ( loca != null && loca != undefined )
+    if( !noprogress )
     {
-        //readtime = calculatereadingtime( loca.text );
+        var skip = true;
+        var readtime = -1;
+        var previousreadtime = -1;
+
+        inquisitor.logic.currentlocationprogress++;
+
+        while( skip 
+            && inquisitor.logic.currentlocationprogress < 
+            inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length )
+        {
+            skip = false;
+
+            var loca     = inquisitor.getlocation( persistentworld.store.currentWorldLocationID )
+                .descriptionsegments[inquisitor.logic.currentlocationprogress];
+            var locanext = inquisitor.getlocation( persistentworld.store.currentWorldLocationID )
+                .descriptionsegments[inquisitor.logic.currentlocationprogress+1];
+        
+            if ( loca     != null && loca     != undefined 
+              && locanext != null && locanext != undefined )
+            {
+                readtime = inquisitor.calculatereadingtime( locanext.text );
+
+                var locatexttrim = loca.text.trim();
+                if( readtime < 750
+                || locatexttrim.charAt( locatexttrim.length - 1 ) !== '.' )
+                {
+                    console.log( locatexttrim.charAt( locatexttrim.length - 1 ) );
+                    skip = true;
+                    inquisitor.logic.currentlocationprogress++;
+                }
+            }
+        }
     }
 
-    if ( locaold != null && locaold != undefined )
-    {
-        previousreadtime = inquisitor.calculatereadingtime( locaold.text );
-    }
+    $( "#notecontinue" ).hide();
 
     var ourheight = 10000;
     var ourtime = 1500;
     var doshow = persistentworld.world.locationvisited[persistentworld.store.currentWorldLocationID];
 
-    if ( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length !== 0 )
+    if ( inquisitor.logic.currentlocationprogress < 
+         inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length 
+      || inquisitor.logic.currenteventactive )
     {
-        if ( inquisitor.logic.currentlocationprogress < inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments.length - 1 )
-        {
-            inquisitor.crossfadeelement( $( "#notecontinue" ), 1500, 0, "\n..." );
-            $( "#endofnote" ).hide();
-            //$( "#diamond" ).hide();
-            //$( "#note" ).stop();
-          //  $( "#note" ).animate( { scrollTop: ourheight }, ourtime );
-
-            //setTimeout( function () { updatetime(); }, readtime );
-
-            //
-        }
-        else
-        {
-            doshow = true;
-        }
+        $( "#notecontinue" ).show();
+        $( "#notecontinue" ).html("...");
+        //inquisitor.crossfadeelement( $( "#notecontinue" ), 1500, 0, "\n..." );
+        $( "#endofnote" ).hide();
     }
     else
     {
         doshow = true;
-    }
-
-    if ( !doshow )
-    {
-        var allow = true;
-        /*if ( descsegments[inquisitor.logic.currentlocationprogress].requiresactivation )
-        {
-            allow = false;
-            allow = inquisitor.testactivationrequirements( inquisitor.logic.currentlocationprogress, descsegments );
-
-            if ( descsegments[inquisitor.logic.currentlocationprogress + 1] !== null && descsegments[inquisitor.logic.currentlocationprogress + 1] != undefined )
-            {
-                if ( descsegments[inquisitor.logic.currentlocationprogress + 1].requiresactivation )
-                {
-                    allow = true;
-                }
-            }
-
-            if ( persistentworld.activations[persistentworld.store.currentWorldLocationID + ":" + index] )
-            {
-                allow = true;
-            }
-        }*/
-        //
-
-        if ( allow )
-        {
-            inquisitor.logic.currentlocationprogress++;
-        }
     }
 
     if ( ( persistentworld.world.state === 'linear' || persistentworld.world.state === 'linearinterface' ) ) //&& dialoguecount > 1
@@ -338,7 +338,8 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
         }
     }
 
-    if ( persistentworld.world.state !== 'stateless' && persistentworld.world.state !== 'linear' && persistentworld.world.state !== 'linearinterface' && !inquisitor.logic.indialogue )
+    if ( persistentworld.world.state !== 'stateless'       && persistentworld.world.state !== 'linear' 
+      && persistentworld.world.state !== 'linearinterface' && !inquisitor.logic.indialogue )
     {
         if ( doshow && inquisitor.logic.conceptsover && !persistentworld.world.locationvisited[persistentworld.store.currentWorldLocationID] )
         {
@@ -406,25 +407,127 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
 
     //
 
-    if ( doshow && inquisitor.logic.conceptsover )
+    if ( doshow && inquisitor.logic.conceptsover && !inquisitor.logic.indialogue )
     {
         inquisitor.toggleExpand();
         persistentworld.world.locationvisited[persistentworld.store.currentWorldLocationID] = true;
 
-        showingvessels = true;
-        inquisitor.displayvessels();
-        inquisitor.crossfadeelement( $( "#notecontinue" ), 1500, 0, "" );
-        $( "#endofnote" ).fadeIn( 500 );
+        //
 
-        if ( persistentworld.world.state === 'linear' )
+        //$( "#eventprompt" ).hide();
+
+        if ( inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).eventid != -1 )
         {
-            traverseoncompletion = false;
+            var eventid = inquisitor.getlocation(persistentworld.store.currentWorldLocationID).eventid;
+            var rawevent = inquisitor.world.rawevents[eventid];
+            if ( rawevent.text !== '' )
+            {
+                var allowevent = ( rawevent.condition === '' );
+    
+                if ( rawevent.timedcondition !== -1 )
+                {
+                    allowevent = rawevent.timedconditionislocal ? ( rawevent.timedcondition <= persistentworld.time.locationtime[persistentworld.store.currentWorldLocationID] ) : ( rawevent.timedcondition <= persistentworld.time.globaltime );
+                    inquisitor.log( 1, "Found timed condition, requiring: " + rawevent.timedcondition, "Event" );
+                }
+                else if ( rawevent.condition !== '' )
+                {
+                    allowevent = !( persistentworld.tokens[rawevent.condition] === undefined || persistentworld.tokens[rawevent.condition] === null );
+                    inquisitor.log( 1, "Found standard condition.", "Event" );
+                }
+    
+                inquisitor.log( 1, "inquisitor: Allowing? " + allowevent, "Event" );
+    
+                if ( allowevent && !inquisitor.logic.indialogue )
+                {
+                    var lengthtest = 200;
+                    while ( true )
+                    {
+                        var rawnewtext = inquisitor.processBodyText( rawevent.descriptionsegments, true, 
+                            false, inquisitor.logic.currenteventactive ? 50000 : lengthtest ) + "\n";
+    
+                            //? "<img src='img/item/TBIM_ITEM_Myno_512.png' id='eventmynobackground' /><img src='img/TBIM_DECO_Twirl_1024x64.png' class='eventdeco' id='eventdeco2' />\n\n\n\n<div id='prompttext'>Continue?<div/>"
+                            //: "<p id='eventfader' class='eventfader' /><img src='img/item/TBIM_ITEM_Myno_512.png' id='eventprompt' />"
+                            //+ "<div id='prompttext'>Activate Memory?<div/>";
+                        
+                            var newtext = ''
+                           // + ( inquisitor.logic.currenteventactive ? "<p id='eventexclusionfader1' class='eventexclusionfader' />" : "" ) 
+                            + "<div class='event" + ( inquisitor.logic.currenteventactive ? "active" : "inactive" ) 
+                            + "'>";
+                            
+                            if( !inquisitor.logic.currenteventactive ) 
+                            {
+                                newtext += "<div id='inactiveeventtext'>" + rawnewtext 
+                                    + "<img src='img/item/TBIM_ITEM_Myno_512.png' id='eventmynobackground' /></div></div><div id='prompttext'>Activate Memory?</div>"; //<img src='img/item/TBIM_ITEM_Myno_512.png' id='eventmynobackground' />
+                                //$( "#note" ).show();
+                                $( "#event" ).html( newtext ).hide().fadeIn( 1000 );
+                                //inquisitor.crossfadeelement( $( "#event" ), 1500, 0, newtext );
+                                inquisitor.bulkclassremove( 'linearlayout' );
+                            }
+                            else
+                            {
+                                newtext = rawnewtext;
+                                $( "#note" ).html( newtext );
+                                //$( "#note" ).fadeIn( 500, function() { $( "#note" ).html( newtext ); } );
+                                inquisitor.bulkclassaddition( 'linearlayout' );
+                            }
+                            
+                            //+ ( inquisitor.logic.currenteventactive ? "<p id='eventexclusionfader2' class='eventexclusionfader' />" : "" );
+                        //<img src='img/TBIM_DECO_Footer_1024x64.png' class='eventdeco' id='eventdeco1' />
+    
+                        if ( $( "#event" ).innerHeight() < 200 || inquisitor.logic.currenteventactive )
+                            break;
+                        lengthtest--;
+                    }
+    
+                    //$( "#eventprompt" ).show();
+    
+                    if( rawevent.givetoken != '' )
+                    {
+                        persistentworld.tokens[rawevent.givetoken] = persistentworld.store.currentWorldLocationID;
+                    }
+    
+                    //
+    
+                    if ( inquisitor.logic.currenteventactive )
+                    {
+                        tryachivement( rawevent.achievementname );
+    
+                        if ( rawevent.soundurl != '' && !persistentworld.soundmuted )
+                        {
+                            inquisitor.audio.playingpriority = true;
+                            inquisitor.audio.priority = new buzz.sound( rawevent.soundurl.trim(), {
+                                formats: ["ogg", "mp3", "wav"]
+                            } );
+                            inquisitor.audio.priority.load();
+    
+                            //inquisitor.log( 1, "Playing sound: " + rawdialogue.soundurl, "Event" );
+                        }
+                    }
+    
+                    //
+                }
+            }
+        }
 
-            var locationtoreturn = persistentworld.store.lastWorldLocationID;
-            persistentworld.store.lastWorldLocationID = persistentworld.store.currentWorldLocationID;
-            persistentworld.store.currentWorldLocationID = locationtoreturn;
+        //
 
-            redraw();
+        if( !inquisitor.logic.currenteventactive )
+        {
+            showingvessels = true;
+            inquisitor.displayvessels();
+            //inquisitor.crossfadeelement( $( "#notecontinue" ), 1500, 0, "" );
+            $( "#endofnote" ).fadeIn( 500 );
+    
+            if ( persistentworld.world.state === 'linear' )
+            {
+                traverseoncompletion = false;
+    
+                var locationtoreturn = persistentworld.store.lastWorldLocationID;
+                persistentworld.store.lastWorldLocationID = persistentworld.store.currentWorldLocationID;
+                persistentworld.store.currentWorldLocationID = locationtoreturn;
+    
+                redraw();
+            }
         }
 
         //$( "#note" ).stop();
@@ -465,4 +568,6 @@ Inquisitor.prototype.updatetime = function( forcetraverse )
     } );
 
     inquisitor.drawcontent();
+
+    console.log( inquisitor );
 }

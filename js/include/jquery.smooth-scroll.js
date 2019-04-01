@@ -5,6 +5,8 @@
  * Licensed MIT
  */
 
+//window.jQuery = window.$ = jQuery;
+
 (function(factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.

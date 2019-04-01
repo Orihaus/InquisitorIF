@@ -4,7 +4,6 @@ function Inquisitor( )
       combinationstore: {},
       indialogue: false,
       currenteventactive: false,
-      soundmuted: false,
       viewingtimeline: false,
 
       escapekeyheldfor: 0,
@@ -28,7 +27,15 @@ function Inquisitor( )
       istransitioning: false
     };
 
+    this.audio = {
+        playingpriority: false,
+        delaybegun: false,
+        delayover: false
+    }
+
     this.render = {
+      zoom: 1.0,
+      scrolling: false,
       showingconsole: false,
       finaldescriptionsegments: {},
       expanddescription: true,
@@ -58,6 +65,7 @@ Inquisitor.prototype.initialize = function ( url, callback )
 Inquisitor.prototype.finishedParsing = function ( result )
 {
     inquisitor.world = result;
+
     inquisitor.rebuildregions();
     inquisitor.rebuildentities( persistentworld.entity.locations );
     //inquisitor.callback();
@@ -66,8 +74,243 @@ Inquisitor.prototype.finishedParsing = function ( result )
 
     inquisitor.render.color = inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).color;
 
+    //
+
+    inquisitor.updateambientaudio();
+
+    //
+
     inquisitor.begindisplay();
     //inquisitor.displayworld();
+}
+
+Inquisitor.prototype.updatezoom = function ( loop )
+{
+    inquisitor.render.zoom = $(document).height() / 1080;
+    $( "#main" ).css('zoom', inquisitor.render.zoom );
+
+    if( true )
+    {
+        setTimeout( function ()
+        {
+            inquisitor.updatezoom();
+        }, 50 );
+    }
+}
+
+Inquisitor.prototype.updatecentering = function ( loop )
+{
+    var scrollto = inquisitor.logic.viewingtimeline ? '#timeline' : '#core';
+
+    var zoomoffset = 1080 - $( scrollto ).innerHeight();
+    var center = $( scrollto ).offset().top;//inquisitor.findcenter( '#note' );
+    //inquisitor.log( 0, "zo: " + zoomoffset );
+    //inquisitor.log( 0, "center: " + center );
+
+    var computedoffset = center - zoomoffset / 2;
+    var changed = ( $( scrollto ).scrollTop() != computedoffset );
+    if( changed && !inquisitor.render.scrolling )
+    {
+        inquisitor.render.scrolling = true;
+        $.smoothScroll( {
+            scrollElement: $( '.content' ),
+            speed: 700,
+            easing: 'swing',
+            offset: computedoffset * inquisitor.render.zoom
+        } );
+
+        setTimeout( function ()
+        {
+            inquisitor.render.scrolling = false;
+        }, 700 );
+    }
+
+    if( true )
+    {
+        setTimeout( function ()
+        {
+            inquisitor.updatecentering();
+        }, 50 );
+    }
+}
+
+Inquisitor.prototype.updateambientaudio = function ()
+{
+    //inquisitor.log( 0, "Audio Update" );
+
+    //
+
+    if( inquisitor.audio.playingpriority )
+    {
+        if( persistentworld.soundmuted && inquisitor.audio.playingpriority )
+        {
+            inquisitor.audio.priority.fadeOut( 1000, function () {
+                this.stop();
+            });
+
+            inquisitor.audio.playingpriority = false;
+        }
+
+        if( !inquisitor.audio.delaybegun )
+        {
+            setTimeout( function ()
+            {
+                inquisitor.audio.delayover = true;
+                inquisitor.audio.priority.play();
+
+                inquisitor.log( 0, "Priority Audio Began." );
+            }, 1100 );
+            inquisitor.audio.delaybegun = true;
+        }
+
+        if( inquisitor.audio.delayover && inquisitor.audio.delaybegun )
+        {
+            if( inquisitor.audio.priority.isEnded() )
+            {
+                inquisitor.audio.playingpriority = false;
+                inquisitor.audio.delayover = false;
+                inquisitor.audio.delaybegun = false;
+
+                inquisitor.log( 0, "Priority Audio Complete." );
+            }
+        }
+    }
+
+    //
+
+    for ( var id in inquisitor.world.audios )
+    {
+        if( !inquisitor.world.audios[id].loop )
+        {
+            if( inquisitor.world.audios[id].firstbuffer.isEnded() && inquisitor.world.audios[id].playing )
+            {
+                inquisitor.world.audios[id].playing = false;
+                inquisitor.log( 0, "Completed Audio: " + inquisitor.world.audios[id].name );
+            }
+        }
+
+        if( persistentworld.soundmuted || inquisitor.audio.playingpriority )
+        {
+            if( inquisitor.world.audios[id].playing )
+            {
+                inquisitor.world.audios[id].firstbuffer.fadeOut( 1000, function () {
+                    this.stop();
+                });
+                inquisitor.world.audios[id].secondbuffer.fadeOut( 1000, function () {
+                    this.stop();
+                });
+
+                inquisitor.world.audios[id].playing = false;
+            }
+        }
+        else
+        {
+            var allow = !inquisitor.world.audios[id].playing 
+                      && inquisitor.world.audios[id].probablility > Math.random();
+            if( allow )
+            {
+                for ( var ruleid in inquisitor.world.audios[id].rules )
+                {
+                   // inquisitor.log( 0, "Testing Audio Rule: " + inquisitor.world.audios[id].rules[ruleid].token );
+                    var requiredtoken = inquisitor.world.audios[id].rules[ruleid].token;
+                    var allowrule = 
+                        ( persistentworld.tokens[requiredtoken] !== undefined 
+                        && persistentworld.tokens[requiredtoken] !== null );
+                    if ( inquisitor.world.audios[id].rules[ruleid].exclusive )
+                    {
+                        allowrule = !allowrule;
+                    }
+
+                    if( !allowrule )
+                    {
+                        allow = false;
+                    }
+
+                    //inquisitor.log( 0, "Allowing Audio Rule: " + allow );
+                }
+            }
+
+            if( allow )
+            {
+                inquisitor.world.audios[id].playing = true;
+
+                //inquisitor.world.audios[id].sound.bind("ended", function () {
+                    //inquisitor.world.audios[id].playing = false;
+                    //inquisitor.log( 0, "Finished Audio: " + inquisitor.world.audios[id].name );
+                //});
+
+                if( !inquisitor.world.audios[id].loop )
+                {
+                    inquisitor.world.audios[id].firstbuffer.play();
+                }
+                else
+                {
+                    var selectedbuffer   = inquisitor.world.audios[id].usefirstbuffer 
+                        ? inquisitor.world.audios[id].firstbuffer
+                        : inquisitor.world.audios[id].secondbuffer;
+                    selectedbuffer.play();
+                }
+
+                inquisitor.log( 0, "Playing Audio: " + inquisitor.world.audios[id].name );
+            }
+            //inquisitor.log( 0, "Audio: " + inquisitor.world.audios[id].name );
+
+            //
+
+            if( inquisitor.world.audios[id].playing )
+            {
+                if( !inquisitor.world.audios[id].loop )
+                {
+                    inquisitor.world.audios[id].targetvolume = 
+                    lerp( inquisitor.world.audios[id].startvolume,
+                          inquisitor.world.audios[id].endvolume,
+                          inquisitor.world.audios[id].firstbuffer.getPercent() / 100.0 );
+
+                    inquisitor.world.audios[id].firstbuffer.setVolume( inquisitor.world.audios[id].targetvolume );
+                }
+                else
+                {
+                    var selectedbuffer   = inquisitor.world.audios[id].usefirstbuffer 
+                        ? inquisitor.world.audios[id].firstbuffer
+                        : inquisitor.world.audios[id].secondbuffer;
+                    var nextbuffer       = !inquisitor.world.audios[id].usefirstbuffer 
+                        ? inquisitor.world.audios[id].firstbuffer
+                        : inquisitor.world.audios[id].secondbuffer;
+
+                    //
+
+                    if( selectedbuffer.getPercent() > inquisitor.world.audios[id].loopat
+                        && !inquisitor.world.audios[id].crossfading )
+                    {
+                        inquisitor.log( 0, "Crossfade: Began" );
+
+                        nextbuffer.play();
+                        nextbuffer.fadeIn( 5000 );
+                        selectedbuffer.fadeOut( 5000, function () {
+                            this.stop();
+                            inquisitor.world.audios[id].crossfading = false;
+
+                            inquisitor.log( 0, "Crossfade: Complete" );
+                        });
+                        inquisitor.world.audios[id].usefirstbuffer = !inquisitor.world.audios[id].usefirstbuffer;
+                        inquisitor.world.audios[id].crossfading = true;
+                    }
+
+                    //
+
+                    inquisitor.world.audios[id].targetvolume = inquisitor.world.audios[id].endvolume;
+                    selectedbuffer.setVolume( inquisitor.world.audios[id].targetvolume );
+                }
+
+                //inquisitor.log( 0, "Volume: " + inquisitor.world.audios[id].targetvolume );
+            }
+        }
+    }
+
+    setTimeout( function ()
+    {
+        inquisitor.updateambientaudio();
+    }, 1000 / 4 );
 }
 
 Inquisitor.prototype.log = function( priority, text, origin )
@@ -176,11 +419,15 @@ Inquisitor.prototype.findlocationbytitle = function ( title, from )
     var selectedid = -1;
     var bestoptimum = -1;
 
-    inquisitor.log( 0, "Looking for location: " + title + ", from: " + inquisitor.world.rawlocations[from].fullname );
+    //inquisitor.log( 0, "Looking for location in regions: " + title );
+
+    //inquisitor.log( 0, "Looking for location: " + title + ", from: " + inquisitor.world.rawlocations[from].fullname );
     var segmentprogress = 0, currentoptimum = 0;
     for ( var id in inquisitor.world.rawlocations )
     {
         var location = inquisitor.world.rawlocations[id];
+        
+        //inquisitor.log( 0, "Testing location: " + title.trim() + ", with: " + location.name.trim() );
         if ( title.trim() === location.name.trim() )
         {
             inquisitor.log( -1, "Found Matching Title: " + location.fullname );
@@ -208,6 +455,20 @@ Inquisitor.prototype.findlocationbytitle = function ( title, from )
         segmentprogress = 0;
     }
 
+    //
+
+    if( selectedid === -1 )
+    {
+        var region = inquisitor.searchallregions( title );
+        if( region !== undefined && region !== null )
+        {
+            //inquisitor.log( 0, "Found location in regions at: " + region.firstid );
+            return region.firstid;
+        }
+    }
+
+    //
+
     return selectedid;
 }
 
@@ -219,6 +480,37 @@ Inquisitor.prototype.getparent = function ( id )
 Inquisitor.prototype.getregionparent = function ( id )
 {
     return inquisitor.findinregions( id, -1 );
+}
+
+Inquisitor.prototype.searchallregions = function ( title )
+{
+    var result = [];
+    var GetAllThings = function( thing, depth ) 
+    {
+        var keys = Object.keys(thing.children);
+        for(var i = 0; i < keys.length; i++ ) 
+        {
+            var child = thing.children[keys[i]];
+            if( Object.keys(child.children).length > 0 )
+            {
+                result.push( child );
+                GetAllThings( child, depth++ );
+            }
+        }
+    
+        return result;
+    };
+
+    GetAllThings( inquisitor.world.regions, 0 );
+    //console.log( result );
+    for( var i = 0; i < result.length; i++ ) 
+    {
+        //inquisitor.log( 0, "Testing: " + result[i].name.trim() + ", with: " + title.trim() );
+        if( result[i].name.trim() === title.trim() )
+        {
+            return result[i];
+        }
+    }
 }
 
 Inquisitor.prototype.findinregions = function ( id, searchoffset )
@@ -459,11 +751,15 @@ Inquisitor.prototype.processlinkadditions = function ( id )
             var finallinktitle = link.title === '' ? inquisitor.world.rawlocations[linklocationid].name : link.title;
 
             availableadditions.push( { index: linklocationid, title: finallinktitle, initiatinglink: link, iswildcard: link.iswildcard } );
-            inquisitor.log( 0, "Adding link to: " + inquisitor.world.rawlocations[linklocationid].fullname );
+            inquisitor.log( 0, "Adding link to: " + inquisitor.world.rawlocations[linklocationid].fullname + ", title: " + finallinktitle );
+        }
+        else if (link.inlinelinkreference)
+        {
+            inquisitor.log( 0, "Inline link. Ignoring. Target: " + link.target );
         }
         else
         {
-            inquisitor.log( 1, "Bad link. Title: " + link.target );
+            inquisitor.log( 1, "Bad link. Target: " + link.target );
         }
     }
 
@@ -477,7 +773,7 @@ Inquisitor.prototype.processtimelineevent = function ( event )
 
     var firsteventhtml = ( inquisitor.render.truetimelineeventsadded == 0 ? ' class="active selected"' : 'class="active"' );
     var datehtml = event.timeline.fulldate.day + "/" + event.timeline.fulldate.month + "/" + event.timeline.fulldate.year + '"';
-    var elementhtml = '<li id="' + datehtml + firsteventhtml + ' data-date="';
+    var elementhtml = '<li tabindex="-1" id="' + datehtml + firsteventhtml + ' data-date="';
     elementhtml += datehtml + '><h1>' + event.timeline.title + "</h1>";
     //elementhtml += '<em>' + event.timeline.displaydate + "</em>";
 
@@ -486,7 +782,7 @@ Inquisitor.prototype.processtimelineevent = function ( event )
 
     //
 
-    var referencehtml = '<li><a id="r' + inquisitor.render.timelineeventsadded + '" data="' + event.timeline.backgroundurl + '" href="#0" ' + firsteventhtml + ' data-date="' + datehtml + ">" + event.timeline.displaydate + '</a></li>';
+    var referencehtml = '<li><a tabindex="-1" id="r' + inquisitor.render.timelineeventsadded + '" data="' + event.timeline.backgroundurl + '" href="#0" ' + firsteventhtml + ' data-date="' + datehtml + ">" + event.timeline.displaydate + '</a></li>';
 
     inquisitor.render.timelineeventsadded++;
     inquisitor.render.truetimelineeventsadded++;
@@ -497,8 +793,8 @@ Inquisitor.prototype.processtimelineevent = function ( event )
 Inquisitor.prototype.processtimelineeventempty = function ( year )
 {
     var datehtml = "01/01/" + year + '"';
-    var referencehtml = '<li><a class="inactive" id="r' + inquisitor.render.timelineeventsadded + '" href="#0" data-date="' + datehtml + ">" + year + '</a></li>';
-    var elementhtml = '<li id="' + datehtml + ' data-date="';
+    var referencehtml = '<li><a tabindex="-1" class="inactive" id="r' + inquisitor.render.timelineeventsadded + '" href="#0" data-date="' + datehtml + ">" + year + '</a></li>';
+    var elementhtml = '<li tabindex="-1" id="' + datehtml + ' data-date="';
     elementhtml += datehtml + '><h1>' + year + "</h1>";
     //elementhtml += '<em>' + year + "</em>";
     elementhtml += '<p> </p></li>';
@@ -561,7 +857,7 @@ Inquisitor.prototype.findlinks = function ( id )
 {
     var links = [], potentiallinks = [];
 
-    var siblings = inquisitor.enumeratesiblings( id ).siblingsfound;
+    /*var siblings = inquisitor.enumeratesiblings( id ).siblingsfound;
     for( var index in siblings )
     {
         inquisitor.log( 0, "Found Sibling: " + siblings[index] );
@@ -574,14 +870,7 @@ Inquisitor.prototype.findlinks = function ( id )
         inquisitor.log( 0, "Found Child: " + children[index] );
         potentiallinks.push( children[index] );
     }
-
-    var additions = inquisitor.processlinkadditions( id );
-    for ( var index in additions )
-    {
-        inquisitor.log( 0, "Found Link Additon: " + additions[index] );
-        potentiallinks.push( additions[index].index );
-    }
-
+    
     var references = inquisitor.accessreferencebufferforid( id );
     if ( references !== undefined && references !== null )
     {
@@ -590,6 +879,13 @@ Inquisitor.prototype.findlinks = function ( id )
             var referenceid = references[index].index;
             potentiallinks.push( referenceid );
         }
+    }*/
+
+    var additions = inquisitor.processlinkadditions( id );
+    for ( var index in additions )
+    {
+        inquisitor.log( 0, "Found Link Additon: " + additions[index] );
+        potentiallinks.push( additions[index].index );
     }
 
     //
@@ -647,28 +943,28 @@ Inquisitor.prototype.rebuildregions = function ()
         if ( recievedbackgroundimage !== null && recievedbackgroundimage !== undefined )
         {
             location.backgroundimage = recievedbackgroundimage;
-            inquisitor.log( 0, "Found parent background: " + location.backgroundimage );
+            //inquisitor.log( 0, "Found parent background: " + location.backgroundimage );
         }
 
         var recievedbackgroundopacity = inquisitor.recursiveupwardsrecieve( index, 'backgroundopacity', '0.3' );
         if ( recievedbackgroundopacity !== null && recievedbackgroundopacity !== undefined )
         {
             location.backgroundopacity = recievedbackgroundopacity;
-            inquisitor.log( 0, "Found parent backgroundopacity: " + location.backgroundopacity );
+            //inquisitor.log( 0, "Found parent backgroundopacity: " + location.backgroundopacity );
         }
 
         var recievedbackgroundbrightness = inquisitor.recursiveupwardsrecieve( index, 'backgroundbrightness', '0.5' );
         if ( recievedbackgroundbrightness !== null && recievedbackgroundbrightness !== undefined )
         {
             location.backgroundbrightness = recievedbackgroundbrightness;
-            inquisitor.log( 0, "Found parent backgroundbrightness: " + location.backgroundbrightness );
+            //inquisitor.log( 0, "Found parent backgroundbrightness: " + location.backgroundbrightness );
         }
 
         var recievedcolor = inquisitor.recursiveupwardsrecieve( index, 'color', '#eeeeee' );
         if ( recievedcolor !== null && recievedcolor !== undefined )
         {
             location.color = recievedcolor;
-            inquisitor.log( 0, "Found parent color: " + location.color );
+            //inquisitor.log( 0, "Found parent color: " + location.color );
         }
 
         var recievedstate = inquisitor.recursiveupwardsrecieve( index, 'state', 'stateless' );
@@ -680,7 +976,14 @@ Inquisitor.prototype.rebuildregions = function ()
                 inquisitor.log( 0, "Found linear state." );
                 inquisitor.world.linearlocations.push( location.id );
             }
-            inquisitor.log( 0, "Found parent state: " + location.state );
+            //inquisitor.log( 0, "Found parent state: " + location.state );
+        }
+
+        var recievedcssadditional = inquisitor.recursiveupwardsrecieve( index, 'cssadditional', '' );
+        if ( recievedcssadditional !== null && recievedcssadditional !== undefined )
+        {
+            location.cssadditional = recievedcssadditional;
+            //inquisitor.log( 0, "Found parent cssadditional: " + location.cssadditional );
         }
 
         inquisitor.setlocation( index, location );
@@ -876,6 +1179,7 @@ Inquisitor.prototype.findparent = function ( result, location )
                     backgroundbrightness: location.backgroundbrightness,
                     color: location.color,
                     state: location.state,
+                    cssadditional: location.cssadditional,
                     children: {},
                     parentid: lastid,
                     name: location.namesegments[regionceptiondepth]

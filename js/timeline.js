@@ -74,7 +74,7 @@ function trybegintimeline()
 			});
 
 			//keyboard navigation
-			$(document).keyup(function(event){
+			/*$(document).keyup(function(event){
 			    if ( event.which == '37' ) //elementInViewport( timeline.get( 0 ) )
 			    {
 			        showNewContent( timelineComponents, timelineTotWidth, 'prev' );
@@ -83,7 +83,7 @@ function trybegintimeline()
 			    {
 					showNewContent(timelineComponents, timelineTotWidth, 'next');
 				}
-			});
+			});*/
 		});
 	}
 

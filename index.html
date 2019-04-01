@@ -1,13 +1,11 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-	<meta charset='UTF-8'>
-    <script src='js/include/jquery.min.js'></script>
-    <script src='js/include/jquery.smooth-scroll.js'></script>
+    <meta charset='UTF-8'>
     <script src='js/include/buzz.js'></script>
-		<script src="js/include/jquery.nicescroll.js"></script>
-    <script src='https://code.createjs.com/easeljs-0.8.2.min.js'></script>
-
+    <script src='node_modules/jquery/dist/jquery.js'></script>
+    <script src='js/include/jquery.smooth-scroll.js'></script>
+    <script src='js/include/jquery.nicescroll.js'></script>
     <script>
         /*					  <p id='finalfader1' class="finalfader">
             <link href='https://fonts.googleapis.com/css?family=Merriweather:300,300italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
@@ -51,14 +49,14 @@
     <script src='js/inquisitorParse.js'>      </script>
     <script src='js/inquisitorLogic.js'>      </script>
     <script src='js/inquisitorRender.js'>     </script>
-		<script src='js/inquisitorInteraction.js'></script>
+	<script src='js/inquisitorInteraction.js'></script>
     <script src='js/sigil.js'>                </script>
-	  <script src='js/bootstrap.js'>            </script>
+	<script src='js/bootstrap.js'>            </script>
     <script src='js/timeline.js'>             </script>
 	<title></title>
 </head>
 
-<body onload="forceRefresh();">
+<body>
     <div id="backgroundprimary" class="background"></div>
     <div id="backgroundsecondary" class="background"></div>
     <div id="backgroundvignette" class="backgroundvignette"></div>
@@ -84,48 +82,33 @@
                         </div> <!-- .events-wrapper -->
                     </div> <!-- .timeline -->
                 </div>
+                <div class="events-content" id="events-content">
+                    </div> <!-- .events-content -->
             </div>
-            <div class="events-content" id="events-content">
-            </div> <!-- .events-content -->
 </section>
 <div id="main">
 		<p id="transitiontext"></p>
         <div id="core">
             <div id="div4">
+                    <div id="illustrationContainer"></div>
 	              <hr class="style-eight">
 								<div id='notebox' class='notebox'>
-									<div class='headerbox'><h4 id='superlocation'></h4><h1 id='location'></h1></div>
+                                    <div class='headerbox'><h4 id='superlocation'></h4><h1 id='location'></h1></div>
+                    <p id='event'></p>
 	                <p id='note'><div id='noteline'></div></p>
 	                <p id='notecontinue' class="continueprompt"></p>
 									<div id='sectionholder'><div id='sectionholderrotator'></div></div>
 	                <p id='notenew' class="excludefirst" />
                 </div>
 								<p id='objects' class='destinations'></p>
-								<p id='vessels' class='destinations'></p>
+                                <p id='vessels' class='destinations'></p>
 								<hr id='endofnote' class="style-two">
 						</div>
             <div id='diamondcontainer'>
                 <div id="diamond" class='diamond'>
+                    <span class="diamondline"></span>
                     <span class="diamondradial" id="diamondbackgroundone" ></span>
                     <span class="diamondradial circle" id="diamondbackgroundtwo"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-10deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-20deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-30deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-40deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-50deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-60deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-70deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-80deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-90deg );"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-100deg);"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-110deg);"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-120deg);"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-130deg);"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-140deg);"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-150deg);"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-160deg);"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-170deg);"></span>
-                    <span class="diamondradial diamondline" style="transform: rotate(-180deg);"></span>
                 </div>
                 <div id='diamondtextcontainer'>
                     <div class='diamonddirection' id='diamondnorth'><p id='NorthIndictator' class='direction directionalt'>N</p><p id='North' class='destinations directional directionalt'></p></div>
@@ -136,8 +119,8 @@
                 <div id='lyscontainer'>
                     <div class='diamond' id="lysdiamondouter"><div class='diamond' id="lysdiamond"><p id="lyscounter">II</p></div></div>
                 </div>
-                <canvas id="forceRefresh" width="1" height="1"></canvas>
             </div>
-					</div>
+                    </div>
+                    <canvas id="forceRefresh" width="1920" height="1080"></canvas>
 </body>
 </html>

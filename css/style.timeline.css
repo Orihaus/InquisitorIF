@@ -209,7 +209,7 @@ background-color: rgba(0, 0, 0, 0);
   width: 34px;
   border-radius: 50%;
   /* replace text with an icon */
-  overflow: hidden;
+  /*overflow: hidden;*/
   color: transparent;
   text-indent: 100%;
   white-space: nowrap;
@@ -263,7 +263,7 @@ background-color: rgba(0, 0, 0, 0);
   width: 100%;
   height: 100% !important;
   padding: 5em 0;
-  overflow: hidden;
+  /*overflow: hidden;*/
   -webkit-transition: height 0.4s;
   -moz-transition: height 0.4s;
   transition: height 0.4s;
@@ -331,7 +331,7 @@ background-color: rgba(0, 0, 0, 0);
 .cd-horizontal-timeline .events-content li.selected {
   /* visible event content */
   height: 100%;
-  overflow: hidden;
+  /*overflow: hidden;*/
   margin: auto;
   position: absolute;
   top: 0; left: 0; bottom: 0; right: 0;

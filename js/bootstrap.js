@@ -17,17 +17,30 @@ catch (ex)
     isusingnwjs = false;
 }
 
-var gui;
-if ( isusingnwjs )
+if( isusingnwjs )
 {
-    require( 'nw.gui' ).Window.get().showDevTools();
-    gui = require( 'nw.gui' );
+    window.$ = window.jQuery = require('jquery');
+    require('./js/include/jquery.smooth-scroll.js');
+    require('./js/include/jquery.nicescroll.js');
+}
+
+var fps = 60;
+function forceRefresh() 
+{
+    // this function updates the renderer at a given frame rate, even if the user is idle.
+    // without this function, the Steam overlay would feel like "frozen".
+    setTimeout(function() {
+      document.getElementById("forceRefresh").getContext("2d").clearRect(0, 0, 1920, 1080);
+      window.requestAnimationFrame(forceRefresh);
+    }, 1000 / fps);
+  }
+
+function lerp(a, b, n) 
+{
+    return (1 - n) * a + n * b;
 }
 
 //
-
-clear();
-inquisitor.initialize( worldLocation, inquisitor.begindisplay );
 
 function resetworld()
 {
@@ -38,22 +51,43 @@ function resetworld()
 
 function tryachivement( achivementname )
 {
+    if( !isusingnwjs )
+    {
+        return;
+    }
+
     if ( achivementname !== "" )
     {
-        //console.log( "Steamworks: activating achievement : " + achivementname );
+        console.log( "Steamworks: activating achievement : " + achivementname );
         //greenworks.activateAchievement( achivementname, function () { console.log( "Steamworks: achieved achievement : " + achivementname ); }, function ( err ) { } );
         //greenworks.activateGameOverlay( "achievements" );
     }
 }
 
+var greenworks;
+var gui;
+var nwin;
 $( document ).ready( function ()
 {
-    var nwin;
-    if( isusingnwjs )
+    /*if( isusingnwjs )
     {
+        greenworks = require('./greenworks');
+        if (greenworks.init())
+        {
+            console.log('Steam API has been initalized.');
+        }
+    
+        forceRefresh();
+    
+        gui = require( 'nw.gui' );
+        //gui.Window.get().showDevTools();
+
         nwin = gui.Window.get();
         nwin.enterFullscreen();
-    }
+    }*/
+
+    clear();
+    inquisitor.initialize( worldLocation, inquisitor.begindisplay );
 } );
 
 var finaldescriptionsegments = [];
@@ -73,7 +107,7 @@ function redraw()
     setTimeout( function () { inquisitor.displayworld(); }, 10 ); //if ( !inquisitor.logic.viewingtimeline ) { inquisitor.toggletimeline();
 }
 
-var greenworks;
+/*var greenworks;
 function testSteamAPI()
 {
     greenworks = require( './greenworks' );
@@ -88,28 +122,9 @@ function testSteamAPI()
             console.log( 'Error on initializing Steam API' );
         }
     }
-}
+}*/
 
-//document.addEventListener( 'DOMContentLoaded', function () { testSteamAPI() } );
-
-var fps = 60;
 var mousevelocityvertical = 0, mousevelocityhorizontal = 0;
-function forceRefresh()
-{
-    //sigil.initialize( 'canvas' );
-    //sigil.draw();
-
-    //mousevelocityhorizontal *= 0.999995;
-    //mousevelocityvertical *= 0.999995;
-
-    // this function updates the renderer at a given frame rate, even if the user is idle.
-    // without this function, the Steam overlay would feel like "frozen".
-    setTimeout( function ()
-    {
-        document.getElementById( "forceRefresh" ).getContext( "2d" ).clearRect( 0, 0, 1, 1 );
-        window.requestAnimationFrame( forceRefresh );
-    }, 1000 / fps );
-}
 
 function tryupdatetime()
 {
@@ -117,7 +132,7 @@ function tryupdatetime()
     if ( inquisitor.logic.indialogue )
     {
         //redraw();
-        inquisitor.begindisplay();
+        inquisitor.updatedialogue();
     }
     else if ( !persistentworld.world.locationvisited[persistentworld.store.currentWorldLocationID] && !inquisitor.logic.showingvessels )
     {
@@ -137,21 +152,12 @@ function tryupdatetime()
 
 window.onresize = function(event)
 {
-    //inquisitor.toggletimeline();
-    inquisitor.drawcontent();
+    //inquisitor.updatezoom();
+    //inquisitor.updatecentering();
 };
 
-//$( 'body' ).addClass( 'fade' );
-function clear()
+function clearvessels()
 {
-    //console.log( "inquisitor: clearing" );
-    var center = ( $( "#core" ).height() - $( "#div4" ).height() ) / 2;
-    //console.log( "inquisitor: Center: " + center );
-    //$( "#div4" ).css( { "top": center } );
-
-    $( "#diamond" ).hide();
-    $( ".diamondradial" ).hide();
-
     $( "#North" ).html( "" );
     $( "#South" ).html( "" );
     $( "#East" ).html( "" );
@@ -171,6 +177,27 @@ function clear()
     inquisitor.logic.southvessels = 0;
     inquisitor.logic.eastvessels  = 0;
     inquisitor.logic.westvessels = 0;
+
+    $( "#vessels" ).html( "" );
+    $( "#objects" ).html( "" );
+
+    inquisitor.render.addedlinks = 0;
+    inquisitor.render.trueaddedlinks = 0;
+}
+
+//$( 'body' ).addClass( 'fade' );
+function clear()
+{
+    //console.log( "inquisitor: clearing" );
+    var center = ( $( "#core" ).height() - $( "#div4" ).height() ) / 2;
+    //console.log( "inquisitor: Center: " + center );
+    //$( "#div4" ).css( { "top": center } );
+
+    $( "#diamond" ).hide();
+    $( ".diamondradial" ).hide();
+    
+    clearvessels();
+
     inquisitor.logic.timelineeventsadded = 0;
     inquisitor.logic.istransitioning = false;
 
@@ -179,17 +206,12 @@ function clear()
     $( "#note" ).html( "" );
     $( "#event" ).html( "" );
     $( "#seperator" ).html( "" );
-    $( "#vessels" ).html( "" );
-    $( "#objects" ).html( "" );
     $( "#region" ).html( "" );
     $( "#subregion" ).html( "" );
     $( "#notenew" ).html( "" );
     $( "#sectionholderrotator" ).html( "" );
 
-    inquisitor.render.addedlinks = 0;
-    inquisitor.render.trueaddedlinks = 0;
     inquisitor.logic.initiatedclearcountdown = false;
-    inquisitor.logic.currentlocationprogress = 0;
     inquisitor.logic.showingvessels = false;
     inquisitor.logic.expanddescription = false;
     inquisitor.logic.currentconceptprogress = 0;
