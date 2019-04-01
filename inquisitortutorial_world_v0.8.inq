@@ -21,13 +21,13 @@ Will create an entire city for you to populate, with districts that join togethe
 
 ~Inquisitor - Navigation - Links
 Adding the additional code:
-
 "~Rome - Capitoline Hill - Piazza del Campidoglio
 This hilltop piazza, designed by Michelangelo in 1538, is one of Rome's most beautiful squares. You can reach it from the Roman Forum, but the most dramatic approach is via the graceful Cordonata staircase up from Piazza d'Ara Coeli. (Lonely Planet)"
 
-Has created another district with its own hub, that (by default) will automatically link to the Piazza della Repubblica as an adjacent hub location. If you're working with more specific links between locations, it's possible to disable automatic links between adjacent locations and hand define each link. Links use this format:
-
+Has created another location with it's own description. Links use this format:
 "[Piazza della Repubblica: Take the bus to the Piazza della Repubblica@North]"
+
+This link will return the player to the location we defined earlier. If there is a conflict where two or more locations share the same name, the link will take you to the nearest, otherwise the full name of the location can be used.
 
 Would you like to learn about inline links? <Click here.|Inline Links>
 
