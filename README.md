@@ -8,9 +8,13 @@ So what makes Inquisitor unique? When I started writing To Burn in Memory I was 
 # Features:
 
 -Cardinal navigation.
+
 -A fully dynamic ambient soundtrack system that evolves based user choices.
+
 -A modern user interface.
+
 -Support for graphical elements, including item icons and backgrounds.
+
 -Scripting can be written in any text editor, with simple syntax and support for complex choice systems and even procedural locations, descriptions and logic.
 
 # Scripting:
