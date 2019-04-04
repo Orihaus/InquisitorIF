@@ -7,15 +7,15 @@ So what makes Inquisitor unique? When I started writing To Burn in Memory I was 
 
 # Features:
 
--Cardinal navigation.
+- Cardinal navigation.
 
--A fully dynamic ambient soundtrack system that evolves based user choices.
+- A fully dynamic ambient soundtrack system that evolves based user choices.
 
--A modern user interface.
+- A modern user interface.
 
--Support for graphical elements, including item icons and backgrounds.
+- Support for graphical elements, including item icons and backgrounds.
 
--Scripting can be written in any text editor, with simple syntax and support for complex choice systems and even procedural locations, descriptions and logic.
+- Scripting can be written in any text editor, with simple syntax and support for complex choice systems and even procedural locations, descriptions and logic.
 
 # Scripting:
 
@@ -53,10 +53,9 @@ Will now prevent use of that link without the token 'HasBusTicket'. To give toke
 |There is a bus ticket stuck on a bench. Take?:-You have taken the bus ticket.+HasBusTicket|
 ```
 
--
-
 Inquisitor will automatically process and display background images for a location and all its children if you add '>yourimage.jpg' on a new line after your location definition.
 
--
+# Tutorial
 
-Everything a player does is automatically saved to disk on move including location, settings and all the tokens they have acquired. This can be reset at any time by holding C.
+The default 'world' included consists of a tutorial that showcases and explains core features you can use in writing your own works.
+
