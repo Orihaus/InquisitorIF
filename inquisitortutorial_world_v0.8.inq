@@ -177,7 +177,7 @@ There are two kinds of audio that can be triggered in Inquisitor. Ambient audio 
 	ambient_01 								- Title
 	~50										- Set to Loop at Time
 	>snd/atmos/toburnatmos_v01-TRACK02  	        - Filename
-	>1.0									        - Probablity
+	>1.0									        - Probablity of Execution Per 250 Milliseconds
 	>0.0-0.5									- Start and End Volume (start only applicable without loop)
 	?HasMynometerActivatedKey                       		- Trigger Token
 )"
