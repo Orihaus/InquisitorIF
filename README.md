@@ -5,6 +5,8 @@ Inquisitor is an Interactive Fiction engine built for use in both a browser-base
 
 So what makes Inquisitor unique? When I started writing To Burn in Memory I was using Twine, but found the choice system to be more suited towards linear narratives than traditional phraser style worlds with locations and items. Inquisitor is a phraser-less hybrid of these styles, usable in both a browser format and as a standalone app, using Node.js or Electron.
 
+![alt text](https://intfiction.org/uploads/default/original/2X/4/421bfd82f9ef9e9db51b7fac44dd00595e4c49cd.jpeg)
+
 # Features:
 
 - Cardinal navigation.
