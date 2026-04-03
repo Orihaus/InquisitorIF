@@ -9,9 +9,11 @@ Inquisitor.prototype.initializeInteraction = function()
 
     //jQuery.scrollSpeed(100, 800);
     //$("#div4").niceScroll( { scrollspeed : 100, horizrailenabled : false, cursorborder : "0px solid #000", cursorborderradius : "0px", cursorwidth : 2, cursorcolor : "#eaeaea", cursoropacitymax : 0.75, background : "background-color: #000" } );
-    $("#note").niceScroll( { scrollspeed : 100, horizrailenabled : false, cursorborder : "0px solid #000", cursorborderradius : "0px", cursorwidth : 2, cursorcolor : "#eaeaea", cursoropacitymax : 0.75, background : "background-color: #000" } );
-    $("#debug").niceScroll( { scrollspeed : 100, horizrailenabled : false, cursorborder : "0px solid #000", cursorborderradius : "0px", cursorwidth : 2, cursorcolor : "#eaeaea", cursoropacitymax : 0.75, background : "background-color: #000" } );
-
+    //$("#note").niceScroll( { scrollspeed : 100, horizrailenabled : false, cursorborder : "0px solid #000", cursorborderradius : "0px", cursorwidth : 2, cursorcolor : "#eaeaea", cursoropacitymax : 0.75, background : "background-color: #000" } );
+    //$("#debug").niceScroll( { scrollspeed : 100, horizrailenabled : false, cursorborder : "0px solid #000", cursorborderradius : "0px", cursorwidth : 2, cursorcolor : "#eaeaea", cursoropacitymax : 0.75, background : "background-color: #000" } );
+    $("#note").css("overflow-y", "visible" );
+    $("#note").css("overflow-x", "hidden" );
+    
     $( document ).on( 'mousemove', function ( event )
     {
         window.requestAnimationFrame( function ()
@@ -94,9 +96,10 @@ Inquisitor.prototype.initializeInteraction = function()
             {
                 if ( +keyDownAt > +lastKeyUpAt && initiatedexitcountdown )
                 {
-                    const remote = require('electron').remote;
-                    let w = remote.getCurrentWindow();
-                    w.close();
+                    window.close();
+                    //app.quit();
+
+                  //  w.close();
                 }
             }, 3000 );
         }
@@ -190,9 +193,12 @@ Inquisitor.prototype.initializeInteraction = function()
 
     $( document ).on( "click", "#notecontinue", function ()
     {
-        inquisitor.logic.currenteventactive = false;
-        inquisitor.log( 0, "Event Prompt Clicked.", "Interaction" );
-        redraw();
+        if( inquisitor.logic.currenteventactive )
+        {
+            inquisitor.logic.currenteventactive = false;
+            inquisitor.log( 0, "Event Prompt Clicked.", "Interaction" );
+            redraw();
+        }
     } );
 
     $( document ).on( "click", "digit", function ()
@@ -334,6 +340,13 @@ Inquisitor.prototype.initializeInteraction = function()
     $( document ).on( "click", "activenote", function ()
     {
         var index = $( this ).attr( "index" );
+
+        var requiredtokens = inquisitor.getlocation(persistentworld.store.currentWorldLocationID).descriptionsegments[index].requiretokens;
+        if( !inquisitor.testqualityconditionalactivation(requiredtokens) )
+        {
+            return;
+        }
+        
         inquisitor.getlocation( persistentworld.store.currentWorldLocationID ).descriptionsegments[index].active = true;
         persistentworld.activations[persistentworld.store.currentWorldLocationID + ":" + index] = true;
 
@@ -342,8 +355,34 @@ Inquisitor.prototype.initializeInteraction = function()
         var givetoken = inquisitor.getlocation(persistentworld.store.currentWorldLocationID).descriptionsegments[index].givetoken;
         if ( givetoken !== '' )
         {
-            persistentworld.tokens[givetoken] = persistentworld.store.currentWorldLocationID;
-            inquisitor.log( 0, "Activenote: Given token:" + givetoken );
+            var givetokenexists = 
+                ( persistentworld.tokens[givetoken] !== undefined 
+                && persistentworld.tokens[givetoken] !== null );
+            var givetokenamount =
+                inquisitor.getlocation(persistentworld.store.currentWorldLocationID).descriptionsegments[index].givetokenamount;
+
+            if( givetokenexists && givetokenamount > 0 )
+            {
+                persistentworld.tokens[givetoken] += 
+                    inquisitor.getlocation(persistentworld.store.currentWorldLocationID).descriptionsegments[index].givetokenamount;
+            }
+            else if( !givetokenexists && givetokenamount > 0 )
+            {
+                persistentworld.tokens[givetoken] = givetokenamount;
+            }
+            else if( givetokenexists && givetokenamount == -1 )
+            {
+                persistentworld.tokens[givetoken] = 1;
+            }
+            else if( !givetokenexists && givetokenamount == -1 )
+            {
+                persistentworld.tokens[givetoken] = 1;
+            }
+
+            persistentworld.tokens[givetoken] = 
+                inquisitor.getlocation(persistentworld.store.currentWorldLocationID).descriptionsegments[index].givetokenamount;
+            inquisitor.log( 0, "Activenote: Given token: " + givetoken );
+            inquisitor.log( 0, "Activenote: Token new value: " + persistentworld.tokens[givetoken] );
             //inquisitor.log( 0, "Activenote: Hiding Object: " + persistentworld.store.currentWorldLocationID, "Interaction" );
             
             if ( givetoken === 'FreeRoam' )

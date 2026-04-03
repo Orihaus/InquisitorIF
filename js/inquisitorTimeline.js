@@ -32,30 +32,33 @@ function trybegintimeline()
 			//console.log( timelineComponents['eventsWrapper'].find( 'a' ) );
 
 			//assign a left postion to the single events along the timeline
-			setDatePosition(timelineComponents, eventsMinDistance);
-			//assign a width to the timeline
-			var timelineTotWidth = setTimelineWidth(timelineComponents, eventsMinDistance);
 			//the timeline has been initialize - show it
 			timeline.addClass( 'loaded' );
 
-			$.smoothScroll( {
-			    scrollElement: $( '.content' ),
-			    offset: inquisitor.findcenter( '.selected' ),
-			} );
+			//$.smoothScroll( {
+			//    scrollElement: $( '.content' ),
+			//    offset: inquisitor.findcenter( '.selected' ),
+			//} );
 
 			//detect click on the next arrow
 			timelineComponents['timelineNavigation'].on('click', '.next', function(event){
 				event.preventDefault();
+				setDatePosition(timelineComponents, eventsMinDistance);
+				var timelineTotWidth = setTimelineWidth(timelineComponents, eventsMinDistance);
 				updateSlide(timelineComponents, timelineTotWidth, 'next');
 			});
 			//detect click on the prev arrow
 			timelineComponents['timelineNavigation'].on('click', '.prev', function(event){
 				event.preventDefault();
+				setDatePosition(timelineComponents, eventsMinDistance);
+				var timelineTotWidth = setTimelineWidth(timelineComponents, eventsMinDistance);
 				updateSlide(timelineComponents, timelineTotWidth, 'prev');
 			});
 			//detect click on the a single event - show new event content
 			timelineComponents['eventsWrapper'].on('click', 'a', function(event){
 				event.preventDefault();
+				setDatePosition(timelineComponents, eventsMinDistance);
+				var timelineTotWidth = setTimelineWidth(timelineComponents, eventsMinDistance);
 				timelineComponents['timelineEvents'].removeClass('selected');
 				$(this).addClass('selected');
 				updateOlderEvents($(this));
@@ -65,10 +68,16 @@ function trybegintimeline()
 
 			//on swipe, show next/prev event content
 			timelineComponents['eventsContent'].on('swipeleft', function(){
+				setDatePosition(timelineComponents, eventsMinDistance);
+				var timelineTotWidth = setTimelineWidth(timelineComponents, eventsMinDistance);
+
 				var mq = checkMQ();
 				( mq == 'mobile' ) && showNewContent(timelineComponents, timelineTotWidth, 'next');
 			});
 			timelineComponents['eventsContent'].on('swiperight', function(){
+				setDatePosition(timelineComponents, eventsMinDistance);
+				var timelineTotWidth = setTimelineWidth(timelineComponents, eventsMinDistance);
+
 				var mq = checkMQ();
 				( mq == 'mobile' ) && showNewContent(timelineComponents, timelineTotWidth, 'prev');
 			});

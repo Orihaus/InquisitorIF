@@ -46,6 +46,11 @@ Inquisitor.prototype.newsave = function()
 
 Inquisitor.prototype.savepersistent = function()
 {
+    if( !inquisitor.world.allowsave )
+    {
+        return;
+    }
+
   localStorage.setItem( inquisitor.world.title + "_activations",    JSON.stringify( persistentworld.activations ) );
   localStorage.setItem( inquisitor.world.title + "_rulestriggered", JSON.stringify( persistentworld.rulestriggered ) );
   localStorage.setItem( inquisitor.world.title + "_tokens",         JSON.stringify( persistentworld.tokens ) );
@@ -60,6 +65,12 @@ Inquisitor.prototype.savepersistent = function()
 
 Inquisitor.prototype.loadpersistent = function()
 {
+    if( !inquisitor.world.allowsave )
+    {
+        inquisitor.newsave();
+        return;
+    }
+
     persistentworld.activations    = JSON.parse( localStorage.getItem( inquisitor.world.title + '_activations' ) );
     persistentworld.tokens         = JSON.parse( localStorage.getItem( inquisitor.world.title + '_tokens' ) );
     persistentworld.rulestriggered = JSON.parse( localStorage.getItem( inquisitor.world.title + '_rulestriggered' ) );

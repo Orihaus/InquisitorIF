@@ -5,7 +5,7 @@ const {app, BrowserWindow} = require('electron');
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-app.commandLine.appendSwitch("in-process-gpu");
+//app.commandLine.appendSwitch("in-process-gpu");
 app.commandLine.appendSwitch('--autoplay-policy','no-user-gesture-required')
 
 let invalidateIntervalId = undefined;
@@ -22,11 +22,12 @@ function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 1920, height: 1080, frame: false })
   mainWindow.setFullScreen(true);
+  mainWindow.openDevTools();
 
 	mainWindow.webContents.on("dom-ready", () => {
 		invalidateIntervalId = setInterval(() => {
 			// help the steam overlay
-			mainWindow.webContents.invalidate();
+			//mainWindow.webContents.invalidate();
 		}, 10);
 	});
 

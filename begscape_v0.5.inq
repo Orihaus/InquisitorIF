@@ -1,4 +1,4 @@
->?begscape0.5
+>?begscape0.5!
 
 ~Introduction - Begscape
 >?linearinterface
@@ -37,8 +37,3 @@ They call this place \\#REPEATINDEX_CITY_NAME\\.
 [\\#REPEATINDEX_CITY_OUTSKIRTS\\ \\#REPEATINDEX_CITY_NAME\\:?Never]
 
 <<
-
-`What is the Timeline?|May 21st, 2002|21/05/2002|silver/viaroma-11_cleaned.png
-"Quisque elit odio, suscipit quis erat non, vehicula fermentum nunc. Curabitur laoreet dapibus leo, sit amet laoreet mi sodales sed. Aliquam et augue ultricies, pellentesque dolor sit amet, mollis lectus. Sed sed elementum ligula. Nam nec sodales mauris."
-@-Cena, John (2016). "A quote example".@@
-The timeline system is useful for providing an appendix of sorts for more historically oriented works. You can navigate using the left and right arrow keys.

@@ -3,6 +3,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
     var result =
     {
         title: "untitled",
+        allowsave: true,
         startinglocation: 0,
         regions: {},
         rawevents: [],
@@ -647,7 +648,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                     }
                     else if ( ch === '"' )
                     {
-                        //console.log( "inquisitorParse: Reading quote as raw." );
+                        console.log( "inquisitorParse: Reading quote as raw." );
 
                         //if ( !checkempty( currentdescriptionsegment.trim() ) )
                         //{
@@ -662,10 +663,11 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                         currentdescriptionsegment += '"' + ch + processconditional( '"' );
 
+
+                        console.log( "inquisitorParse: Ending quote : " + currentdescriptionsegment );
+
                         var olddescriptionsegment = { text: currentdescriptionsegment + '"', requiresactivation: false, active: true, postactivationtext: '', islink: false }
                         location.descriptionsegments.push( olddescriptionsegment ); currentdescriptionsegment = "";
-
-                        //console.log( "inquisitorParse: Ending quote." );
 
                         next();
                     }
@@ -867,20 +869,32 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                             //console.log( "inquisitorParse: Is additional note: " + newdescriptionsegment.additional );
 
-                            newdescriptionsegment.postactivationtext += processconditional( '|', '+', '?', '!', '(' );
+                            newdescriptionsegment.postactivationtext += processconditional( '|', '+', '?', '!', '(', '#' );
 
                             if ( ch === '+' )
                             {
-                                newdescriptionsegment.givetoken += processconditional( '|', '?', '!' );
+                                newdescriptionsegment.givetoken += processconditional( '|', '?', '!', '#', ':' );
                                 newdescriptionsegment.givetoken = newdescriptionsegment.givetoken.trim();
                                 //console.log( "inquisitorParse: Found Token to Give: " + newdescriptionsegment.givetoken );
+
+                                if( ch === ':' )
+                                {
+                                    next();
+                                    newdescriptionsegment.givetokenamount = ch + processconditional( '|', '?', '!', '#' );
+                                    newdescriptionsegment.givetokenamount = newdescriptionsegment.givetokenamount.trim();
+                                    newdescriptionsegment.givetokenamount = Math.floor( newdescriptionsegment.givetokenamount );
+                                }
+                                else
+                                {
+                                    newdescriptionsegment.givetokenamount = -1;
+                                }
                             }
 
                             if ( ch === '(' )
                             {
                                 next();
                                 var localtimecondition = ch === '^';
-                                var timedcondition = parseInt( processconditional( ')', '+' ).trim() );
+                                var timedcondition = parseInt( processconditional( ')', '+', '#' ).trim() );
                                 //console.log( "inquisitorParse: Found " + ( localtimecondition ? "Local" : "Global" ) + " Time Conditional: " + timedcondition );
 
                                 newdescriptionsegment.timedcondition = timedcondition;
@@ -891,15 +905,31 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                         while ( true )
                         {
-                            if ( ch === '?' || ch === '!' )
+                            if ( ch === '?' || ch === '!' || ch === '#' )
                             {
                                 newdescriptionsegment.requiresactivation = true;
 
                                 var requiretoken = {};
-                                requiretoken.requireinversion = ( ch === '!' );
-                                next();
-                                requiretoken.token = ch + processconditional( '|', '?', '!' );
-                                requiretoken.token = requiretoken.token.trim();
+
+                                if( ch === '#' ) // Quality Conditional
+                                {
+                                    requiretoken.qualityconditional = true;
+
+                                    next();
+                                    requiretoken.token = ch + processconditional( '>' );
+                                    requiretoken.token = requiretoken.token.trim();
+
+                                    next();
+                                    requiretoken.chance = ch + processconditional( '|', '?', '!', '#' );
+                                    requiretoken.chance = requiretoken.chance.trim();
+                                }
+                                else
+                                {
+                                    requiretoken.requireinversion = ( ch === '!' );
+                                    next();
+                                    requiretoken.token = ch + processconditional( '|', '?', '!', '#' );
+                                    requiretoken.token = requiretoken.token.trim();
+                                }
 
                                 newdescriptionsegment.requiretokens.push( requiretoken );
                                 //console.log( "inquisitorParse: Found Token to Require: " + newdescriptionsegment.requiretokens[newdescriptionsegment.requiretokens.length - 1] );
@@ -909,7 +939,7 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
                             {
                                 break;
                             }
-                            else if( ch !== '?' && ch !== '!' )
+                            else if( ch !== '?' && ch !== '!' && ch !== '#' )
                             {
                                 next();
                             }
@@ -951,10 +981,10 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
                         var inlinelink = {};
                         //inlinelink.text  = grableadingwhitespace();
-                        inlinelink.text = processconditional( '|' );
+                        inlinelink.destination = processconditional( ':' );
                         next();
-                        inlinelink.destination = ch + processconditional( '>' );
-                        inlinelink.destination = inlinelink.destination.trim();
+                        inlinelink.text = ch + processconditional( '>' );
+                        inlinelink.text = inlinelink.text.trim();
                         inlinelink.segmentindex = location.descriptionsegments.length;
                         location.inlinelinks.push( inlinelink );
 
@@ -1434,34 +1464,37 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
           usefirstbuffer: true,
           firstbuffer: {},
           secondbuffer: {},
-          startvolume: 1.0,
-          endvolume: 0.5,
-          targetvolume: 0.5,
+          volume: 1.0,
+          startpercent: 0.0,
+          endpercent: 0.0,
           loop: false,
           loopat: 0.0,
+          loopmaxcount: 0.0,
           playing: false,
           crossfading: false
         }
 
         next();
-        audio.name          = ch + processconditional( ">", "~" )       .trim();
+        audio.name          = ch + processconditional( ">" ).trim(); next();
+        audio.volume        = ch + processconditional( ">", "~" ).trim() * 100.0;
 
         if( ch === "~" )
         {
             audio.loop = true;
             next();
-            audio.loopat = ch + processconditional( ">" ).trim();
+            audio.loopat       = ch + processconditional( "-" ).trim(); next();
+            audio.loopmaxcount = ch + processconditional( ">" ).trim();
         }
         next();
 
         audio.url           = ch + processconditional( ">" )            .trim(); next();
-        audio.probablility  = ch + processconditional( ">" )            .trim(); next();
+        audio.probablility  = ch + processconditional( ">", "?", "!", ")" )            .trim(); next();
 
         if( !audio.loop )
         {
-            audio.startvolume   = ( ch + processconditional( "-" )          .trim() ) * 100.0; next();
+            audio.startpercent   = ( ch + processconditional( "-" )          .trim() ); next();
+            audio.endpercent    = ( ch + processconditional( "?", "!", ")" ).trim() );
         }
-        audio.endvolume     = ( ch + processconditional( "?", "!", ")" ).trim() ) * 100.0;
 
         //
 
@@ -1478,8 +1511,9 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
 
         console.log( "inquisitorParse: Audio found: " + audio.name 
             + ". URL: "                               + audio.url 
-            + ". Start Volume: "                               + audio.startvolume 
-            + ". End Volume: "                               + audio.endvolume 
+            + ". Volume: "                               + audio.volume 
+            + ". Start Percent: "                               + audio.startpercent 
+            + ". End Percent: "                               + audio.endpercent 
             + ". Probablility: "                      + audio.probablility );
 
         while( ch === '?' ||  ch === '!' )
@@ -1507,7 +1541,8 @@ Inquisitor.prototype.parse = function ( inputsource, maincallback )
     var processtitle = function ()
     {
         next();
-        result.title = ch + processconditional( "\n" ).trim();
+        result.title = ch + processconditional( "!", "\n" ).trim();
+        result.allowsave = ch != "!";
 
         return result.title;
     }

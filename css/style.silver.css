@@ -321,7 +321,7 @@ hr.diamondstyle
     text-align: center;
     width: 20px;
     height: 0px;
-        pointer-events: all;
+        pointer-events: none;
 }
 /**/
 
@@ -540,7 +540,7 @@ hr.diamondstyle
     top: -300px;
     clear: both;
     height:auto;
-        pointer-events:none;
+        pointer-events:all;
 }
 #core.linearlayout
 {
@@ -568,7 +568,7 @@ hr.diamondstyle
   max-height: initial;
   overflow-y: hidden;
   overflow-x: hidden;
-  /*pointer-events:all;*/
+  pointer-events:all;
 }
 
 #sectionholder
@@ -720,15 +720,16 @@ h4.linearlayout
   text-align: justify !important;
   font-size: 17.0px;
   white-space: pre-wrap;
-  overflow-y:auto;
-  max-height: 400px;
+  overflow-y:visible;
+  max-height: 800px;
   font-weight: 300;
   font-style: normal;
   line-height: 1.7em;
   border: 1px solid rgba( 255, 255, 255, 0.075 );
   border-left: 0px;
   border-right: 0px;
-  overflow-x:hidden;
+  pointer-events: all;
+  /*overflow-x:hidden;*/
 -webkit-transform: translate3d(0,0,0);
 }
 
@@ -747,13 +748,13 @@ h4.linearlayout
   border-right: 0px;
   margin-bottom:20px;
   max-width: 1100px;
-  max-height: 700px;
+  max-height: 800px;
   height: 100%;
   -webkit-transition:width 3000ms ease-in-out, height 3000ms ease-in-out;
   -moz-transition:width 3000ms ease-in-out, height 3000ms ease-in-out;
   -o-transition:width 3000ms ease-in-out, height 3000ms ease-in-out;
   transition:width 3000ms ease-in-out, height 3000ms ease-in-out;
-  pointer-events: all;
+ /* pointer-events: none;*/
 }
 
 #note.dialoguelayout
@@ -1159,6 +1160,7 @@ div.dialogue
 emphasis
 {
     font-style: italic;
+    font-weight:bold;
   -webkit-box-decoration-break:clone;
   box-decoration-break:clone;
 }
@@ -1582,6 +1584,7 @@ p.destinations
     font-size:92.5%;
     letter-spacing: 0.175em;
     font-weight:bold;
+    top: 10px;
     bottom: 35px;
     z-index: 100000;
     pointer-events: all;
@@ -1608,8 +1611,6 @@ afterfirst
 
 }
 
-/*
-
 ::-webkit-scrollbar {
     width: 5px;
         scrollbar-face-color: #a69471;
@@ -1626,8 +1627,6 @@ afterfirst
     border-radius: 1px;
     background: rgba(191,191,191,0.25);
 }
-
-*/
 
 @keyframes fadeout {
     from { opacity: 1; }

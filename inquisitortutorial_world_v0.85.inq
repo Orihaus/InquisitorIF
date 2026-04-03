@@ -2,10 +2,11 @@
 >/img/item/TBIM_ITEM_Lantern_512.png?IconExampleToken
 
 (
-	ambient_01
+	ambient_03
+	>0.6
 	>snd/atmos/toburnatmos_v01-TRACK02
-	>1.0
-	>0.9-0.9
+	>0.0125
+	>0.0-0.5
 	?PlayingAmbient
 )
 
@@ -14,10 +15,76 @@
 >silver/silver_rembrandt_03b.png:0.5
 An engine for multiplatform Interactive Fiction works, Inquisitor is built for use in both browser-based and standalone form. Designed around putting spaces at the core of a hypertext work, it's a combination of Twine and Aliceffekt's Paradise if you will, made to expand on the strengths of both as well as provide a pleasant reading experience.
 
-~Inquisitor - Navigation - Basics
+~|Inquisitor - Documentation - Cheat Sheet
 >?world
 >silver/silver_rembrandt_03b.png:0.3
 >#ccb68b
+Inquisitor syntax can be quite opaque to a new user. Here's the basic syntax laid out for you.
+
+">? : Set Project Title
+
+	*Example : >?Zork*
+	
+~ / ^ : Location/Object Definition
+	| : (Second Character) Set as Starting Location
+	x - y : (First Line) Parent Locations Followed by Location Name
+	> : Background Image. Opacity. Brightness
+	>? : Define State
+	># : Set Color""
+
+	*Location Example :
+		~|District - House - Hallway
+		>?Reality
+		>#ccb68b
+
+	Object Example :
+		^District - House - Hallway - Chair*
+
+	Body Text.
+
+	|x| : Interactive Body Text Section
+		x|y : Prompt Text Followed by Text After Activation
+		+ : (Final Line) Give Token on Use
+		? / ! : (At End) Conditional Require/Reject Token
+
+	*Example : |Flip Light Switch|The room is lit.+RoomIsLit|?PowerOn*
+
+	<x> : Body Text Inline Link
+		x:y : Link Destination Followed by Description of Link
+		? / ! : (At End) Conditional Require/Reject Token
+
+	*Example : <Attic|You See a Ladder up to the Attic?RoomIsLit>*
+
+	[x] / {x} : (After Body Text) Soft/Hard Link
+		x:y : Link Destination Followed by Description of Link
+		? / ! : (At End) Conditional Require/Reject Token
+		+ : (At End) Give Token on Use
+		@ : (At End) Set Link Direction
+
+	*Example : [Basement:Down the Hatch to the Basement+EnteredBasement@Down?RoomIsLit]*
+
+# / ` : Create Standard/Timeline Event
+	Note: Standard events attach to next defined location by default.
+	x|y|z : (Timeline Only) Event Name then Event Time Description then Event Time Actual
+	[x] : Conditional Token
+
+	*Standard Event Example :
+		#[EnteredBasement]
+		Body Text
+
+	Timeline Event Example :
+		`House Built|May 21st, 1948|21/05/1948
+		Body Text*
+
+^^ : Create NPC Agent
+( : Load Audio Track
+>> : Include .inq File
+>| : Define Rule
+>/ : Load Icon"
+
+[Basics:Learn the Basics of Navigation@East]
+
+~Inquisitor - Navigation - Basics
 Locations are defined by their name, and their place in the structure of the world is informed by this. For example the code:
 
 "~Rome - Viminal Hill - Piazza della Repubblica
@@ -26,6 +93,7 @@ Flanked by grand 19th-century neoclassical colonnades, this landmark piazza was 
 Will create an entire city for you to populate, with districts that join together at the first location that defined them. As well as a description to be read on entry.
 
 [Links:Learn linking@South]
+[Cheat Sheet:Read the Cheat Sheet@West]
 
 ~Inquisitor - Navigation - Links
 Adding the additional code:
@@ -37,7 +105,7 @@ Has created another location with it's own description. Links use this format:
 
 This link will return the player to the location we defined earlier. If there is a conflict where two or more locations share the same name, the link will take you to the nearest, otherwise the full name of the location can be used.
 
-Would you like to learn about inline links? <Click here.|Inline Links>
+Would you like to learn about inline links? <Inline Links:Click here.>
 
 [Basics:Back to the basics@North]
 [Conditionals:Learn how to create conditional links@East]
@@ -57,7 +125,16 @@ To give a token, it's as simple as adding "+HasBusTicket" to any action. Actions
 
 "|There is a bus ticket stuck on a bench. Take?:-You have taken the bus ticket.+HasBusTicket|"
 
+[Quality Conditionals:Learn about Quality Conditionals@East]
 [Links:Return to Links@West]
+
+~Inquisitor - Navigation - Quality Conditionals
+
+|Level Up Spot Hidden:-Spot Hidden Increased.+SpotHidden:5|
+|Spot Hidden:-Hidden Object Found.+HiddenDetected#SpotHidden>20!HiddenDetected|
+|Hidden Object:-Hidden Object Taken.+HiddenTaken?HiddenDetected!HiddenTaken|
+
+[Conditionals:Return to Conditionals@West]
 
 ~Inquisitor - Navigation - Traversal Descriptions
 See the short description under each location link? You can define these by adding ":Your Description Here" after a link declaration. Example:
@@ -192,7 +269,7 @@ You have been taken here due to the global director triggering a rule. Director 
 
 The inputs to the conditions can be either tokens or global values. Currently the only avaiable operation is 'travel', which will teleport the player to the specified location on trigger. This is the rule definition used to take you here: ">|_progress>0:travel.Director|"
 
-<Click here to return.|Advanced and Experimental>
+<Advanced and Experimental:Click here to return.>
 
 ^:Inquisitor - Advanced and Experimental - Maeve
 Maeve is an NPC defined with the same identifier as a standard object ("^"), only now followed by an additional ":" to specify this object as one that will wander the world of its own accord.

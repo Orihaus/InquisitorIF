@@ -105,6 +105,66 @@ Inquisitor.prototype.cantraverse = function ( startlocationindex, targetlocation
     return result;
 }
 
+Inquisitor.prototype.findqualityconditional = function( requiredtokens )
+{
+    var index = -1;
+    for ( var tokenindex = 0; tokenindex < requiredtokens.length; tokenindex++ )
+    {
+        if( !requiredtokens[tokenindex].qualityconditional )
+        {
+            //inquisitor.log( 0, "Is not Quality Conditional, ignoring" );
+            continue;
+        }
+        
+        index = tokenindex;
+    }
+
+    return index;
+}
+Inquisitor.prototype.findqualityconditionalchance = function( requiredtoken )
+{
+    var chance = 0;
+
+    var requiredtokenexists = 
+        ( persistentworld.tokens[requiredtoken.token] !== undefined 
+        && persistentworld.tokens[requiredtoken.token] !== null );
+
+    if( requiredtokenexists )
+    {
+        chance = persistentworld.tokens[requiredtoken.token];
+    }
+
+    return Math.floor( requiredtoken.chance ) + Math.floor( chance );
+}
+
+Inquisitor.prototype.testqualityconditionalactivation = function( requiredtokens )
+{
+    inquisitor.log( 0, "Testing Quality Conditional activation results." );
+
+    var allow = true;
+    for ( var tokenindex = 0; tokenindex < requiredtokens.length; tokenindex++ )
+    {
+        if( !requiredtokens[tokenindex].qualityconditional )
+        {
+            inquisitor.log( 0, "Is not Quality Conditional, ignoring" );
+            continue;
+        }
+
+        allow = false;
+
+        var chance = inquisitor.findqualityconditionalchance( requiredtokens[tokenindex] );
+        var roll = Math.floor( Math.random() * 100.0 );
+        inquisitor.log( 0, "Rolled: " +  roll );
+        inquisitor.log( 0, "Chance: " +  chance );
+        if( roll >= 100 - chance )
+        {
+            allow = true;
+            inquisitor.log( 0, "Success");
+        }
+    }
+
+    return allow;
+}
 
 Inquisitor.prototype.testactivationrequirements = function( requiredtokens )
 {
@@ -114,6 +174,12 @@ Inquisitor.prototype.testactivationrequirements = function( requiredtokens )
     for ( var tokenindex = 0; tokenindex < requiredtokens.length; tokenindex++ )
     {
         inquisitor.log( 0, "Testing for required token: " + requiredtokens[tokenindex].token );
+
+        if( requiredtokens[tokenindex].qualityconditional )
+        {
+            inquisitor.log( 0, "Is Quality Conditional, ignoring" );
+            continue;
+        }
 
         var requiredtoken = requiredtokens[tokenindex].token;
         var requiredtokeninversion = requiredtokens[tokenindex].requireinversion;

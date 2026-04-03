@@ -57,7 +57,7 @@ Inquisitor.prototype.processdrawntextsegment = function( type, iscurrent, differ
         var finaltextsegment = "<" + type + " class='" + segmentclass + "'" + brightness + "index='" + trueindex + "' id='" + trueindex + "'>"
             + inquisitor.processdescriptiontext( text, !isfirstindex || removefirst, iscurrent && !alliscurrent ) + "</" + type + ">";
 
-        //console.log( finaltextsegment );
+        console.log( finaltextsegment );
         return finaltextsegment;
     }
     else
@@ -68,6 +68,9 @@ Inquisitor.prototype.processdrawntextsegment = function( type, iscurrent, differ
 
 Inquisitor.prototype.processdescriptiontext = function( descriptiontext, removefirst, isactive )
 {
+    descriptiontext = inquisitor.replacecharacter( descriptiontext, '<', '&lt', '&lt' );
+    descriptiontext = inquisitor.replacecharacter( descriptiontext, '>', '&gt', '&gt' );
+
   if ( descriptiontext.trim() === '-' )
   {
       return '<hr class="textbreak">';
@@ -142,7 +145,7 @@ Inquisitor.prototype.processdescriptiontext = function( descriptiontext, removef
     description = inquisitor.replacecharacter( description, '"', '<quote>\u2018', '\u2019</quote>' );
     description = inquisitor.replacecharacter( description, '@@', '<notetitle>', '</notetitle>' );
     description = inquisitor.replacecharacter( description, '*', '<emphasis>', '</emphasis>' );
-    description = inquisitor.replacecharacter( description, '%', '<inner>', '</inner>' );
+    description = inquisitor.replacecharacter( description, '%%', '<inner>', '</inner>' );
 
     /*if ( true ) //isactive
     {
@@ -438,7 +441,19 @@ Inquisitor.prototype.processBodyText = function( inputdescriptionsegments, iseve
                       {
                         if( !persistentworld.activations[persistentworld.store.currentWorldLocationID + ":" + index] )
                         {
-                            rawtext += inquisitor.processdrawntextsegment( "activenote", iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, currentdescriptionsegment[index].text, index, currentprogress, alliscurrent );
+                            var activenotedrawntext = currentdescriptionsegment[index].text;
+                            var qualityconditionalindex = inquisitor.findqualityconditional( currentdescriptionsegment[index].requiretokens );
+                            
+                            if( qualityconditionalindex != -1 )
+                            {
+                                var chance = 
+                                    inquisitor.findqualityconditionalchance( currentdescriptionsegment[index].requiretokens[qualityconditionalindex] );
+                                
+                                activenotedrawntext += " %%(" + chance + "%)%%";
+                                inquisitor.log( 0, "Quality Conditional Chance Displayed." );
+                            }
+
+                            rawtext += inquisitor.processdrawntextsegment( "activenote", iscurrent, differenceovertruemax, trueindex, isfirstindex, removefirst, activenotedrawntext, index, currentprogress, alliscurrent );
                         }
                         else
                         {

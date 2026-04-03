@@ -81,12 +81,19 @@ Inquisitor.prototype.finishedParsing = function ( result )
     //
 
     inquisitor.begindisplay();
+    inquisitor.updatetime( false, false );
     //inquisitor.displayworld();
+
+    setTimeout( function ()
+    {
+        inquisitor.drawcontent();
+    }, 250 );
 }
 
 Inquisitor.prototype.updatezoom = function ( loop )
 {
-    inquisitor.render.zoom = $(document).height() / 1080;
+    var previouszoom = inquisitor.render.zoom;
+    inquisitor.render.zoom = $(document).height() / 1600.0;
     $( "#main" ).css('zoom', inquisitor.render.zoom );
 
     if( true )
@@ -94,7 +101,12 @@ Inquisitor.prototype.updatezoom = function ( loop )
         setTimeout( function ()
         {
             inquisitor.updatezoom();
-        }, 50 );
+        }, 500 );
+    }
+
+    if( inquisitor.render.zoom != previouszoom )
+    {
+        this.updatecentering( false );
     }
 }
 
@@ -102,21 +114,21 @@ Inquisitor.prototype.updatecentering = function ( loop )
 {
     var scrollto = inquisitor.logic.viewingtimeline ? '#timeline' : '#core';
 
-    var zoomoffset = 1080 - $( scrollto ).innerHeight();
-    var center = $( scrollto ).offset().top;//inquisitor.findcenter( '#note' );
+    //var zoomoffset = 1080 - $( scrollto ).innerHeight();
+    var center = inquisitor.findcenter( scrollto ) - ( 1600.0 * ( 1.0 - inquisitor.render.zoom ) ) * 0.25;
     //inquisitor.log( 0, "zo: " + zoomoffset );
     //inquisitor.log( 0, "center: " + center );
 
-    var computedoffset = center - zoomoffset / 2;
-    var changed = ( $( scrollto ).scrollTop() != computedoffset );
-    if( changed && !inquisitor.render.scrolling )
+    var computedoffset = center;// - zoomoffset / 2;
+    //var changed = ( $( scrollto ).scrollTop() != computedoffset );
+    if( !inquisitor.render.scrolling )
     {
         inquisitor.render.scrolling = true;
         $.smoothScroll( {
             scrollElement: $( '.content' ),
             speed: 700,
             easing: 'swing',
-            offset: computedoffset * inquisitor.render.zoom
+            offset: computedoffset
         } );
 
         setTimeout( function ()
@@ -125,12 +137,12 @@ Inquisitor.prototype.updatecentering = function ( loop )
         }, 700 );
     }
 
-    if( true )
+    if( loop )
     {
         setTimeout( function ()
         {
             inquisitor.updatecentering();
-        }, 50 );
+        }, 500 );
     }
 }
 
@@ -211,7 +223,7 @@ Inquisitor.prototype.updateambientaudio = function ()
             {
                 for ( var ruleid in inquisitor.world.audios[id].rules )
                 {
-                    inquisitor.log( 0, "Testing Audio Rule: " + inquisitor.world.audios[id].rules[ruleid].token );
+                    //inquisitor.log( 0, "Testing Audio Rule: " + inquisitor.world.audios[id].rules[ruleid].token );
                     var requiredtoken = inquisitor.world.audios[id].rules[ruleid].token;
                     var allowrule = 
                         ( persistentworld.tokens[requiredtoken] !== undefined 
@@ -233,6 +245,14 @@ Inquisitor.prototype.updateambientaudio = function ()
             if( allow )
             {
                 inquisitor.world.audios[id].playing = true;
+                inquisitor.world.audios[id].loopcount = Math.floor( ( Math.random() ) * inquisitor.world.audios[id].loopmaxcount );
+                inquisitor.world.audios[id].beginpercent = lerp( 
+                    inquisitor.world.audios[id].startpercent, 
+                    inquisitor.world.audios[id].endpercent, 
+                    Math.random() );
+
+                inquisitor.log( 0, "Audio loop count: " + inquisitor.world.audios[id].loopcount );
+                inquisitor.log( 0, "Audio Begining at: " + inquisitor.world.audios[id].beginpercent );
 
                 //inquisitor.world.audios[id].sound.bind("ended", function () {
                     //inquisitor.world.audios[id].playing = false;
@@ -264,16 +284,18 @@ Inquisitor.prototype.updateambientaudio = function ()
                     if( inquisitor.world.audios[id].firstbuffer.getPercent() > 0 )
                     {
                         inquisitor.world.audios[id].targetvolume = 
-                            lerp( inquisitor.world.audios[id].startvolume,
-                                inquisitor.world.audios[id].endvolume,
-                                inquisitor.world.audios[id].firstbuffer.getPercent() / 100.0 );
+                            lerp( 0.0,
+                                inquisitor.world.audios[id].volume,
+                                Math.min( Math.max( 
+                                    ( ( inquisitor.world.audios[id].firstbuffer.getPercent() / 100.0 ) - inquisitor.world.audios[id].beginpercent ) 
+                                    * ( 1.0 / ( 1.0 - inquisitor.world.audios[id].beginpercent ) ), 0.0 ), 1.0 ) );
                     }
                     else
                     {
-                        inquisitor.world.audios[id].targetvolume = inquisitor.world.audios[id].startvolume;
+                        inquisitor.world.audios[id].targetvolume = inquisitor.world.audios[id].volume;
                     }
 
-                         //inquisitor.log( 0, inquisitor.world.audios[id].targetvolume );
+                    //inquisitor.log( 0, "Playing Audio: " + inquisitor.world.audios[id].name + " at: " + inquisitor.world.audios[id].targetvolume );
 
                     inquisitor.world.audios[id].firstbuffer.setVolume( inquisitor.world.audios[id].targetvolume );
                 }
@@ -289,7 +311,8 @@ Inquisitor.prototype.updateambientaudio = function ()
                     //
 
                     if( selectedbuffer.getPercent() > inquisitor.world.audios[id].loopat
-                        && !inquisitor.world.audios[id].crossfading )
+                        && !inquisitor.world.audios[id].crossfading 
+                        && inquisitor.world.audios[id].loopcount < inquisitor.world.audios[id].loopmaxcount )
                     {
                         inquisitor.log( 0, "Crossfade: Began" );
 
@@ -303,11 +326,13 @@ Inquisitor.prototype.updateambientaudio = function ()
                         });
                         inquisitor.world.audios[id].usefirstbuffer = !inquisitor.world.audios[id].usefirstbuffer;
                         inquisitor.world.audios[id].crossfading = true;
+
+                        inquisitor.world.audios[id].loopcount++;
                     }
 
                     //
 
-                    inquisitor.world.audios[id].targetvolume = inquisitor.world.audios[id].endvolume;
+                    inquisitor.world.audios[id].targetvolume = inquisitor.world.audios[id].volume;
                     selectedbuffer.setVolume( inquisitor.world.audios[id].targetvolume );
                 }
 
